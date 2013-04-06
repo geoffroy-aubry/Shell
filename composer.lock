@@ -107,15 +107,18 @@
         },
         {
             "name": "geoffroy-aubry/logger",
-            "version": "v1.0.0",
+            "version": "v1.0.1",
             "source": {
                 "type": "git",
                 "url": "git@indefero.hi-media-techno.com:archi-logger.git",
-                "reference": "v1.0.0"
+                "reference": "v1.0.1"
             },
             "require": {
                 "php": ">=5.3.3",
                 "psr/log": "1.0.0"
+            },
+            "require-dev": {
+                "geoffroy-aubry/debug": "1.0.*"
             },
             "type": "library",
             "autoload": {
@@ -136,7 +139,7 @@
             "keywords": [
                 "bla"
             ],
-            "time": "2013-04-01 10:05:17"
+            "time": "2013-04-01 23:03:03"
         }
     ],
     "aliases": [

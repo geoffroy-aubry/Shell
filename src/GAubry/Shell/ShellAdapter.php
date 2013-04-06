@@ -43,6 +43,12 @@ class ShellAdapter implements ShellInterface
     private $_aConfig;
 
     /**
+     * Options de type "[-o ssh_option]" à ajouter à chaque commande SSH ou SCP.
+     * @var string
+     */
+    private $_sSSHOptions;
+
+    /**
      * Constructeur.
      *
      * @param \Psr\Log\LoggerInterface $oLogger Instance utilisée pour loguer les commandes exécutées
@@ -52,6 +58,10 @@ class ShellAdapter implements ShellInterface
         $this->_oLogger = $oLogger;
         $this->_aConfig = $aConfig;
         $this->_aFileStatus = array();
+
+        $this->_sSSHOptions = ' -o StrictHostKeyChecking=no'
+                            . ' -o ConnectTimeout=' . $this->_aConfig['ssh_connection_timeout']
+                            . ' -o BatchMode=yes';
     }
 
     /**
@@ -197,10 +207,8 @@ class ShellAdapter implements ShellInterface
         $sCmd = sprintf($sPatternCmd, $this->escapePath($sRealPath));
         //$sCmd = vsprintf($sPatternCmd, array_map(array(self, 'escapePath'), $mParams));
         if ($bIsRemote) {
-            $sSSHOptions = ' -o StrictHostKeyChecking=no'
-                         . ' -o ConnectTimeout=' . $this->_aConfig['ssh_connection_timeout']
-                         . ' -o BatchMode=yes';
-            $sCmd = "ssh$sSSHOptions -T $sServer " . $this->_aConfig['bash_path'] . " <<EOF\n$sCmd\nEOF\n";
+            $sCmd = 'ssh' . $this->_sSSHOptions . " -T $sServer "
+                  . $this->_aConfig['bash_path'] . " <<EOF\n$sCmd\nEOF\n";
         }
         return $sCmd;
     }
@@ -343,7 +351,8 @@ class ShellAdapter implements ShellInterface
         list(, $sDestServer, $sDestRealPath) = $this->isRemotePath($sDestPath);
 
         if ($sSrcServer != $sDestServer) {
-            $sCmd = 'scp -rpq ' . $this->escapePath($sSrcPath) . ' ' . $this->escapePath($sDestPath);
+            $sCmd = 'scp' . $this->_sSSHOptions . ' -rpq '
+                  . $this->escapePath($sSrcPath) . ' ' . $this->escapePath($sDestPath);
             return $this->exec($sCmd);
         } else {
             $sCmd = 'cp -a %s ' . $this->escapePath($sDestRealPath);
