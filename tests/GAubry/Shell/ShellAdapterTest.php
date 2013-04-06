@@ -774,7 +774,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->at(0))->method('exec')->with($this->equalTo('ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes -T gaubry@dv2 /bin/bash <<EOF' . "\n" . 'mkdir -p "/destpath/to/my dir"' . "\n" . 'EOF' . "\n"));
         $oMockShell->expects($this->at(1))->method('exec')
-            ->with($this->equalTo('scp -rpq "/srcpath/to/my file" "gaubry@dv2:/destpath/to/my dir"'))
+            ->with($this->equalTo('scp -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes -rpq "/srcpath/to/my file" "gaubry@dv2:/destpath/to/my dir"'))
             ->will($this->returnValue($aExpectedResult));
         $oMockShell->expects($this->exactly(2))->method('exec');
 
@@ -793,7 +793,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
         $oMockShell->expects($this->at(0))->method('exec')
             ->with($this->equalTo('mkdir -p "' . $this->_aConfig['tmp_dir'] . '"'));
         $oMockShell->expects($this->at(1))->method('exec')
-            ->with($this->equalTo('scp -rpq "aai-01:/path/to/a"*".css" "' . $this->_aConfig['tmp_dir'] . '"'))
+            ->with($this->equalTo('scp -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes -rpq "aai-01:/path/to/a"*".css" "' . $this->_aConfig['tmp_dir'] . '"'))
             ->will($this->returnValue($aExpectedResult));
         $oMockShell->expects($this->exactly(2))->method('exec');
 
@@ -811,7 +811,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->at(0))->method('exec')->with($this->equalTo('ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes -T gaubry@dv2 /bin/bash <<EOF' . "\n" . 'mkdir -p "/destpath/to"' . "\n" . 'EOF' . "\n"));
         $oMockShell->expects($this->at(1))->method('exec')
-            ->with($this->equalTo('scp -rpq "/srcpath/to/my file" "gaubry@dv2:/destpath/to/my file"'))
+            ->with($this->equalTo('scp -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes -rpq "/srcpath/to/my file" "gaubry@dv2:/destpath/to/my file"'))
             ->will($this->returnValue($aExpectedResult));
         $oMockShell->expects($this->exactly(2))->method('exec');
 
