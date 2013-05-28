@@ -4,7 +4,7 @@ namespace GAubry\Shell;
 
 use \Psr\Log\LoggerInterface;
 use \Psr\Log\LogLevel;
-use \GAubry\Tools\Tools;
+use \GAubry\Helpers\Helpers;
 
 /**
  * Classe outil facilitant l'exécution des commandes shell.
@@ -651,16 +651,14 @@ class ShellAdapter implements ShellInterface
 
             $aResult = array();
             foreach ($aAllStats as $aStats) {
-                list($sTransferred, ) = Tools::convertFileSize2String(
-                    $aStats['total transferred file size'],
-                    $aStats['total file size']
-                );
-                list($sTotal, $sUnit) = Tools::convertFileSize2String($aStats['total file size']);
+                list($sTransferred, $sTransfUnit) =
+                    Helpers::intToMultiple($aStats['total transferred file size'], true);
+                list($sTotal, $sTotalUnit) = Helpers::intToMultiple($aStats['total file size'], true);
 
                 $aResult[] = 'Number of transferred files ( / total): ' . $aStats['number of files transferred']
                            . ' / ' . $aStats['number of files'] . "\n"
                            . 'Total transferred file size ( / total): '
-                           . $sTransferred . ' / ' . $sTotal . " $sUnit";
+                           . $sTransferred . ' ' . $sTransfUnit . 'o / ' . $sTotal . ' ' . $sTotalUnit . 'o';
             }
         }
         return $aResult;

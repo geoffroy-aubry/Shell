@@ -13,7 +13,7 @@
     "require": {
         "php": ">=5.3.3",
         "psr/log": "1.0.0",
-        "geoffroy-aubry/tools": "1.0.*"
+        "geoffroy-aubry/helpers": "1.1.*"
     },
     "require-dev": {
         "geoffroy-aubry/debug": "1.0.*",
@@ -30,10 +30,6 @@
         {
             "type": "vcs",
             "url": "git@indefero.hi-media-techno.com:archi-logger.git"
-        },
-        {
-            "type": "vcs",
-            "url": "git@indefero.hi-media-techno.com:archi-tools.git"
         }
     ]
 }
