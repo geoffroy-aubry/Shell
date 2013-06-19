@@ -1,35 +1,28 @@
 {
     "name":         "geoffroy-aubry/shell",
-    "description":  "bla bla",
-    "keywords":     ["bla"],
+    "description":  "?",
+    "keywords":     ["?"],
     "type":         "library",
     "license":      "LGPL-3.0+",
     "authors":      [
         {
             "name":     "Geoffroy Aubry",
-            "email":    "gaubry@hi-media.com"
+            "email":    "geoffroy.aubry@free.fr"
         }
     ],
     "require": {
         "php": ">=5.3.3",
         "psr/log": "1.0.0",
-        "geoffroy-aubry/helpers": "1.1.*"
+        "geoffroy-aubry/helpers": "1.*"
     },
     "require-dev": {
-        "geoffroy-aubry/debug": "1.0.*",
-        "geoffroy-aubry/logger": "1.0.*"
+        "phpunit/phpunit":           ">=3.7",
+        "phpmd/phpmd":               "1.4.*",
+        "squizlabs/php_codesniffer": "1.4.*",
+        "apigen/apigen":             "2.8.0",
+        "geoffroy-aubry/logger":     "1.*"
     },
     "autoload": {
         "psr-0": {"GAubry\\Shell": "src/"}
-    },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "git@indefero.hi-media-techno.com:archi-debug.git"
-        },
-        {
-            "type": "vcs",
-            "url": "git@indefero.hi-media-techno.com:archi-logger.git"
-        }
-    ]
+    }
 }

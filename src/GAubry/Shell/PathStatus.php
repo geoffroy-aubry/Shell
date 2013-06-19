@@ -4,11 +4,6 @@ namespace GAubry\Shell;
 
 /**
  * Collection des statuts possibles pour un chemin du système de fichiers.
- *
- * @category TwengaDeploy
- * @package Lib
- * @author Geoffroy AUBRY <geoffroy.aubry@twenga.com>
- * @see Shell_Interface::getPathStatus()
  */
 final class PathStatus
 {
@@ -50,6 +45,7 @@ final class PathStatus
 
     /**
      * Classe de constantes, non instanciable.
+     * @codeCoverageIgnore
      */
     private function __construct()
     {

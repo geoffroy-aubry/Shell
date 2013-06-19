@@ -4,10 +4,6 @@ namespace GAubry\Shell;
 
 /**
  * Pour faciliter l'exécution des commandes shell.
- *
- * @category TwengaDeploy
- * @package Lib
- * @author Geoffroy AUBRY <geoffroy.aubry@twenga.com>
  */
 interface ShellInterface
 {
@@ -17,7 +13,7 @@ interface ShellInterface
      * Plusieurs lots de processus parallèles peuvent être générés si le nombre de valeurs
      * dépasse la limite $iMax.
      *
-     * Exemple : $this->parallelize(array('aai@aai-01', 'prod@aai-01'), "ssh [] /bin/bash <<EOF\nls -l\nEOF\n", 2);
+     * Exemple : $this->parallelize(array('user1@server', 'user2@server'), "ssh [] /bin/bash <<EOF\nls -l\nEOF\n", 2);
      * Exemple : $this->parallelize(array('a', 'b'), 'cat /.../resources/[].txt', 2);
      *
      * @param array $aValues liste de valeurs qui viendront remplacer le(s) '[]' du pattern

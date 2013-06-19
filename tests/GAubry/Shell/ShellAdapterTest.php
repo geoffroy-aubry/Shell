@@ -6,11 +6,6 @@ use \GAubry\Shell\ShellAdapter;
 use \GAubry\Logger\MinimalLogger;
 use \Psr\Log\LogLevel;
 
-/**
- * @category TwengaDeploy
- * @package Tests
- * @author Geoffroy AUBRY <geoffroy.aubry@twenga.com>
- */
 class ShellAdapterTest extends \PHPUnit_Framework_TestCase
 {
 
@@ -27,6 +22,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
     private $oShell;
 
     private $_aConfig;
+    private $_aResourcesDir;
 
     /**
      * Tableau indexé contenant les commandes Shell de tous les appels effectués à Shell_Adapter::exec().
@@ -56,6 +52,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
     public function setUp ()
     {
         $this->_aConfig = $GLOBALS['aConfig']['GAubry\Shell'];
+        $this->_aResourcesDir = $GLOBALS['aConfig']['tests_resources_dir'];
         $this->oLogger = new MinimalLogger(LogLevel::WARNING);
         $this->oShell = new ShellAdapter($this->oLogger, $this->_aConfig);
     }
@@ -212,12 +209,12 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
     public function testParallelize_wellFormedSimpleCall ()
     {
         $sExpectedCmd = $this->_aConfig['bash_path'] . ' ' . $this->_aConfig['lib_dir']
-                      . '/parallelize.inc.sh "aai@aai-01 prod@aai-01"'
+                      . '/parallelize.inc.sh "user1@server user2@server"'
                       . ' "ssh [] ' . $this->_aConfig['bash_path']
                       . ' <<EOF' . "\n" . 'ls -l' . "\n" . 'EOF' . "\n" . '"';
         $aReturnExec = array(
-            '---[aai@aai-01]-->0|0s', '[CMD]', 'foo', '[OUT]', '1', '[ERR]', '///',
-            '---[prod@aai-01]-->0|0s', '[CMD]', 'foo', '[OUT]', '0', '[ERR]', '///',
+            '---[user1@server]-->0|0s', '[CMD]', 'foo', '[OUT]', '1', '[ERR]', '///',
+            '---[user2@server]-->0|0s', '[CMD]', 'foo', '[OUT]', '0', '[ERR]', '///',
         );
 
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
@@ -228,7 +225,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
         $oMockShell->expects($this->exactly(1))->method('exec');
 
         $oMockShell->parallelize(
-            array('aai@aai-01', 'prod@aai-01'),
+            array('user1@server', 'user2@server'),
             "ssh [] /bin/bash <<EOF\nls -l\nEOF\n",
             2
         );
@@ -240,12 +237,12 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
     public function testParallelize_wellFormedSplittedCalls ()
     {
         $sFirstExpectedCmd = $this->_aConfig['bash_path'] . ' ' . $this->_aConfig['lib_dir']
-                      . '/parallelize.inc.sh "aai@aai-01 prod@aai-01 x"'
+                      . '/parallelize.inc.sh "user1@server user2@server x"'
                       . ' "ssh [] ' . $this->_aConfig['bash_path']
                       . ' <<EOF' . "\n" . 'ls -l' . "\n" . 'EOF' . "\n" . '"';
         $aFirstReturnExec = array(
-            '---[aai@aai-01]-->0|0s', '[CMD]', 'foo', '[OUT]', '1', '[ERR]', '///',
-            '---[prod@aai-01]-->0|0s', '[CMD]', 'foo', '[OUT]', '0', '[ERR]', '///',
+            '---[user1@server]-->0|0s', '[CMD]', 'foo', '[OUT]', '1', '[ERR]', '///',
+            '---[user2@server]-->0|0s', '[CMD]', 'foo', '[OUT]', '0', '[ERR]', '///',
             '---[x]-->0|0s', '[CMD]', 'foo', '[OUT]', '0', '[ERR]', '///',
         );
         $sSecondExpectedCmd = $this->_aConfig['bash_path'] . ' ' . $this->_aConfig['lib_dir']
@@ -268,7 +265,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
         $oMockShell->expects($this->exactly(2))->method('exec');
 
         $oMockShell->parallelize(
-            array('aai@aai-01', 'prod@aai-01', 'x', 'y', 'z'),
+            array('user1@server', 'user2@server', 'x', 'y', 'z'),
             "ssh [] /bin/bash <<EOF\nls -l\nEOF\n",
             3
         );
@@ -285,7 +282,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
         $this->setExpectedException('RuntimeException', 'aborted!');
         $oMockShell->parallelize(
             array('a', 'b'),
-            'cat ' . $this->_aConfig['tests_resources_dir'] . '/testParallelize_[].txt',
+            'cat ' . $this->_aResourcesDir . '/testParallelize_[].txt',
             2
         );
     }
@@ -300,23 +297,23 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
                 'value' => 'a',
                 'error_code' => 0,
                 //'elapsed_time' => 0,
-                'cmd' => 'cat ' . $this->_aConfig['tests_resources_dir'] . '/testParallelize_a.txt',
-                'output' => file_get_contents($this->_aConfig['tests_resources_dir'] . '/testParallelize_a.txt'),
+                'cmd' => 'cat ' . $this->_aResourcesDir . '/testParallelize_a.txt',
+                'output' => file_get_contents($this->_aResourcesDir . '/testParallelize_a.txt'),
                 'error' => ''
             ),
             array(
                 'value' => 'b',
                 'error_code' => 0,
                 //'elapsed_time' => 0,
-                'cmd' => 'cat ' . $this->_aConfig['tests_resources_dir'] . '/testParallelize_b.txt',
-                'output' => file_get_contents($this->_aConfig['tests_resources_dir'] . '/testParallelize_b.txt'),
+                'cmd' => 'cat ' . $this->_aResourcesDir . '/testParallelize_b.txt',
+                'output' => file_get_contents($this->_aResourcesDir . '/testParallelize_b.txt'),
                 'error' => ''
             ),
         );
 
         $aResult = $this->oShell->parallelize(
             array('a', 'b'),
-            'cat ' . $this->_aConfig['tests_resources_dir'] . '/testParallelize_[].txt',
+            'cat ' . $this->_aResourcesDir . '/testParallelize_[].txt',
             2
         );
         unset($aResult[0]['elapsed_time']);
@@ -335,24 +332,24 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
                 'value' => 'a',
                 'error_code' => 0,
                 //'elapsed_time' => 0,
-                'cmd' => 'cat ' . $this->_aConfig['tests_resources_dir'] . '/testParallelize_a.txt',
-                'output' => file_get_contents($this->_aConfig['tests_resources_dir'] . '/testParallelize_a.txt'),
+                'cmd' => 'cat ' . $this->_aResourcesDir . '/testParallelize_a.txt',
+                'output' => file_get_contents($this->_aResourcesDir . '/testParallelize_a.txt'),
                 'error' => ''
             ),
             array(
                 'value' => 'b',
                 'error_code' => 0,
                 //'elapsed_time' => 0,
-                'cmd' => 'cat ' . $this->_aConfig['tests_resources_dir'] . '/testParallelize_b.txt',
-                'output' => file_get_contents($this->_aConfig['tests_resources_dir'] . '/testParallelize_b.txt'),
+                'cmd' => 'cat ' . $this->_aResourcesDir . '/testParallelize_b.txt',
+                'output' => file_get_contents($this->_aResourcesDir . '/testParallelize_b.txt'),
                 'error' => ''
             ),
             array(
                 'value' => 'c',
                 'error_code' => 0,
                 //'elapsed_time' => 0,
-                'cmd' => 'cat ' . $this->_aConfig['tests_resources_dir'] . '/testParallelize_c.txt',
-                'output' => file_get_contents($this->_aConfig['tests_resources_dir'] . '/testParallelize_c.txt'),
+                'cmd' => 'cat ' . $this->_aResourcesDir . '/testParallelize_c.txt',
+                'output' => file_get_contents($this->_aResourcesDir . '/testParallelize_c.txt'),
                 'error' => ''
             ),
         );
@@ -364,7 +361,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
 
         $aResult = $oMockShell->parallelize(
             array('a', 'b', 'c'),
-            'cat ' . $this->_aConfig['tests_resources_dir'] . '/testParallelize_[].txt',
+            'cat ' . $this->_aResourcesDir . '/testParallelize_[].txt',
             2
         );
         unset($aResult[0]['elapsed_time']);
@@ -381,11 +378,11 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
     {
         $this->setExpectedException(
             'RuntimeException',
-            'cat: ' . $this->_aConfig['tests_resources_dir'] . '/not_exists.txt: No such file or directory'
+            'cat: ' . $this->_aResourcesDir . '/not_exists.txt: No such file or directory'
         );
         $aResult = $this->oShell->parallelize(
             array('testParallelize_a', 'not_exists'),
-            'cat ' . $this->_aConfig['tests_resources_dir'] . '/[].txt',
+            'cat ' . $this->_aResourcesDir . '/[].txt',
             2
         );
     }
@@ -408,7 +405,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
 
         $oMockShell->parallelize(
             array('a'),
-            'cat ' . $this->_aConfig['tests_resources_dir'] . '/[].txt',
+            'cat ' . $this->_aResourcesDir . '/[].txt',
             2
         );
     }
@@ -431,7 +428,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
 
         $oMockShell->parallelize(
             array('a', 'b'),
-            'cat ' . $this->_aConfig['tests_resources_dir'] . '/[].txt',
+            'cat ' . $this->_aResourcesDir . '/[].txt',
             2
         );
     }
@@ -474,6 +471,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers \GAubry\Shell\ShellAdapter::execSSH
+     * @covers \GAubry\Shell\ShellAdapter::buildSSHCmd
      */
     public function testExecSsh_ThrowExceptionWhenExecFailed ()
     {
@@ -486,6 +484,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers \GAubry\Shell\ShellAdapter::execSSH
+     * @covers \GAubry\Shell\ShellAdapter::buildSSHCmd
      */
     public function testExecSsh_WithLocalPath ()
     {
@@ -503,6 +502,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers \GAubry\Shell\ShellAdapter::execSSH
+     * @covers \GAubry\Shell\ShellAdapter::buildSSHCmd
      */
     public function testExecSsh_WithMultipleLocalPath ()
     {
@@ -520,6 +520,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers \GAubry\Shell\ShellAdapter::execSSH
+     * @covers \GAubry\Shell\ShellAdapter::buildSSHCmd
      */
     public function testExecSsh_WithRemotePath ()
     {
@@ -793,11 +794,11 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
         $oMockShell->expects($this->at(0))->method('exec')
             ->with($this->equalTo('mkdir -p "' . $this->_aConfig['tmp_dir'] . '"'));
         $oMockShell->expects($this->at(1))->method('exec')
-            ->with($this->equalTo('scp -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes -rpq "aai-01:/path/to/a"*".css" "' . $this->_aConfig['tmp_dir'] . '"'))
+            ->with($this->equalTo('scp -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes -rpq "server:/path/to/a"*".css" "' . $this->_aConfig['tmp_dir'] . '"'))
             ->will($this->returnValue($aExpectedResult));
         $oMockShell->expects($this->exactly(2))->method('exec');
 
-        $aResult = $oMockShell->copy('aai-01:/path/to/a*.css', $this->_aConfig['tmp_dir']);
+        $aResult = $oMockShell->copy('server:/path/to/a*.css', $this->_aConfig['tmp_dir']);
         $this->assertEquals($aExpectedResult, $aResult);
     }
 
@@ -918,14 +919,14 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
     public function testGetParallelSSHPathStatus_wellFormed()
     {
         $sExpectedCmd = $this->_aConfig['bash_path'] . ' ' . $this->_aConfig['lib_dir']
-                      . '/parallelize.inc.sh "aai@aai-01 prod@aai-01"'
+                      . '/parallelize.inc.sh "user1@server user2@server"'
                       . ' "ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes -T [] '
                       . $this->_aConfig['bash_path'] . ' <<EOF' . "\n"
                       . '[ -h \"/path/to/my file\" ] && echo -n 1; [ -d \"/path/to/my file\" ] && echo 2 || ([ -f \"/path/to/my file\" ] && echo 1 || echo 0)'
                       . "\n" . 'EOF' . "\n" . '"';
         $aReturnExec = array(
-            '---[aai@aai-01]-->0|0s', '[CMD]', 'foo', '[OUT]', '1', '[ERR]', '///',
-            '---[prod@aai-01]-->0|0s', '[CMD]', 'foo', '[OUT]', '0', '[ERR]', '///',
+            '---[user1@server]-->0|0s', '[CMD]', 'foo', '[OUT]', '1', '[ERR]', '///',
+            '---[user2@server]-->0|0s', '[CMD]', 'foo', '[OUT]', '0', '[ERR]', '///',
         );
 
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
@@ -936,7 +937,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
 
         $oMockShell->getParallelSSHPathStatus (
             '/path/to/my file',
-            array('aai@aai-01', 'prod@aai-01')
+            array('user1@server', 'user2@server')
         );
     }
 
@@ -946,14 +947,14 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
     public function testGetParallelSSHPathStatus_With2Files ()
     {
         $aReturnExec = array(
-            '---[aai@aai-01]-->0|0s', '[CMD]', 'foo', '[OUT]', '1', '[ERR]', '///',
-            '---[prod@aai-01]-->0|0s', '[CMD]', 'foo', '[OUT]', '0', '[ERR]', '///',
+            '---[user1@server]-->0|0s', '[CMD]', 'foo', '[OUT]', '1', '[ERR]', '///',
+            '---[user2@server]-->0|0s', '[CMD]', 'foo', '[OUT]', '0', '[ERR]', '///',
         );
         $aExpectedParallelResult = array(
-            'aai@aai-01' => 1,
-            'prod@aai-01' => 0
+            'user1@server' => 1,
+            'user2@server' => 0
         );
-        $aExpectedStatusResult = array('aai@aai-01:/path/to/my file' => 1);
+        $aExpectedStatusResult = array('user1@server:/path/to/my file' => 1);
 
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->at(0))->method('exec')
@@ -962,7 +963,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
 
         $aResult = $oMockShell->getParallelSSHPathStatus (
             '/path/to/my file',
-            array('aai@aai-01', 'prod@aai-01')
+            array('user1@server', 'user2@server')
         );
         $this->assertEquals($aExpectedParallelResult, $aResult);
         $this->assertAttributeEquals($aExpectedStatusResult, '_aFileStatus', $oMockShell);
@@ -976,17 +977,17 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetParallelSSHPathStatus_WithCacheAnd1File (ShellAdapter $oMockShell)
     {
-        $aExpectedInitStatus = array('aai@aai-01:/path/to/my file' => 1);
+        $aExpectedInitStatus = array('user1@server:/path/to/my file' => 1);
         $aReturnExec = array(
-            '---[prod@aai-01]-->0|0s', '[CMD]', 'foo', '[OUT]', '12', '[ERR]', '///',
+            '---[user2@server]-->0|0s', '[CMD]', 'foo', '[OUT]', '12', '[ERR]', '///',
         );
         $aExpectedParallelResult = array(
-            'aai@aai-01' => 1,
-            'prod@aai-01' => 12
+            'user1@server' => 1,
+            'user2@server' => 12
         );
         $aExpectedStatusResult = array(
-            'aai@aai-01:/path/to/my file' => 1,
-            'prod@aai-01:/path/to/my file' => 12
+            'user1@server:/path/to/my file' => 1,
+            'user2@server:/path/to/my file' => 12
         );
 
         $this->assertAttributeEquals($aExpectedInitStatus, '_aFileStatus', $oMockShell);
@@ -996,7 +997,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
 
         $aResult = $oMockShell->getParallelSSHPathStatus (
             '/path/to/my file',
-            array('aai@aai-01', 'prod@aai-01')
+            array('user1@server', 'user2@server')
         );
         $this->assertEquals($aExpectedParallelResult, $aResult);
         $this->assertAttributeEquals($aExpectedStatusResult, '_aFileStatus', $oMockShell);
@@ -1011,12 +1012,12 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
     public function testGetParallelSSHPathStatus_WithOnlyCache (ShellAdapter $oMockShell)
     {
         $aExpectedInitStatus = array(
-            'aai@aai-01:/path/to/my file' => 1,
-            'prod@aai-01:/path/to/my file' => 12
+            'user1@server:/path/to/my file' => 1,
+            'user2@server:/path/to/my file' => 12
         );
         $aExpectedParallelResult = array(
-            'aai@aai-01' => 1,
-            'prod@aai-01' => 12
+            'user1@server' => 1,
+            'user2@server' => 12
         );
         $aExpectedStatusResult = $aExpectedInitStatus;
 
@@ -1025,7 +1026,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
 
         $aResult = $oMockShell->getParallelSSHPathStatus (
             '/path/to/my file/',	// Le slash final est intentionnel, pour tester sa suppression automatique.
-            array('aai@aai-01', 'prod@aai-01')
+            array('user1@server', 'user2@server')
         );
         $this->assertEquals($aExpectedParallelResult, $aResult);
         $this->assertAttributeEquals($aExpectedStatusResult, '_aFileStatus', $oMockShell);
@@ -1050,7 +1051,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
     public function testSync_LocalFileToLocalDir ()
     {
         $aExpectedResult = array('Number of transferred files ( / total): 2 / 1774
-Total transferred file size ( / total): <1 / 61 Mio
+Total transferred file size ( / total): 178 o / 61 Mio
 ');
         $aRawRsyncResult = array('---[-]-->0|0s', '[CMD]', '...', '[OUT]',
             'Number of files: 1774',
@@ -1094,7 +1095,7 @@ Total transferred file size ( / total): <1 / 61 Mio
     public function testSync_LocalFileToLocalDirInKioUnit ()
     {
         $aExpectedResult = array('Number of transferred files ( / total): 2 / 1774
-Total transferred file size ( / total): <1 / 63 Kio
+Total transferred file size ( / total): 178 o / 63 Kio
 ');
         $aRawRsyncResult = array('---[-]-->0|0s', '[CMD]', '...', '[OUT]',
             'Number of files: 1774',
@@ -1137,7 +1138,7 @@ Total transferred file size ( / total): <1 / 63 Kio
     public function testSync_LocalFileToLocalDirInOctetUnit ()
     {
         $aExpectedResult = array('Number of transferred files ( / total): 2 / 1774
-Total transferred file size ( / total): 178 / 640 o
+Total transferred file size ( / total): 178 o / 640 o
 ');
         $aRawRsyncResult = array('---[-]-->0|0s', '[CMD]', '...', '[OUT]',
             'Number of files: 1774',
@@ -1181,7 +1182,7 @@ Total transferred file size ( / total): 178 / 640 o
     {
         $aExpectedResult = array(
             'Number of transferred files ( / total): 2 / 1774
-Total transferred file size ( / total): <1 / 61 Mio',
+Total transferred file size ( / total): 178 o / 61 Mio',
         );
         $aRawRsyncResult = array('---[1]-->0|0s', '[CMD]', '...', '[OUT]',
             'Number of files: 1774',
@@ -1253,7 +1254,7 @@ Total transferred file size ( / total): <1 / 61 Mio',
     {
         $aExpectedResult = array(
             'Number of transferred files ( / total): 2 / 1774
-Total transferred file size ( / total): <1 / 61 Mio',
+Total transferred file size ( / total): 178 o / 61 Mio',
         );
         $aRawRsyncResult = array('---[-]-->0|0s', '[CMD]', '...', '[OUT]',
             'Number of files: 1774',
@@ -1297,7 +1298,7 @@ Total transferred file size ( / total): <1 / 61 Mio',
     {
         $aExpectedResult = array(
             'Number of transferred files ( / total): 2 / 1774
-Total transferred file size ( / total): <1 / 61 Mio',
+Total transferred file size ( / total): 178 o / 61 Mio',
         );
         $aRawRsyncResult = array('---[-]-->0|0s', '[CMD]', '...', '[OUT]',
             'Number of files: 1774',
@@ -1340,7 +1341,7 @@ Total transferred file size ( / total): <1 / 61 Mio',
     public function testSync_LocalFileToLocalDirWithAdditionalExclude ()
     {
         $aExpectedResult = array('Number of transferred files ( / total): 2 / 1774
-Total transferred file size ( / total): <1 / 61 Mio
+Total transferred file size ( / total): 178 o / 61 Mio
 ');
         $aRawRsyncResult = array('---[-]-->0|0s', '[CMD]', '...', '[OUT]',
             'Number of files: 1774',
@@ -1383,7 +1384,7 @@ Total transferred file size ( / total): <1 / 61 Mio
     public function testSync_LocalFileToLocalDirWithSimpleInclude ()
     {
         $aExpectedResult = array('Number of transferred files ( / total): 2 / 1774
-Total transferred file size ( / total): <1 / 61 Mio
+Total transferred file size ( / total): 178 o / 61 Mio
 ');
         $aRawRsyncResult = array('---[-]-->0|0s', '[CMD]', '...', '[OUT]',
             'Number of files: 1774',
@@ -1428,10 +1429,10 @@ Total transferred file size ( / total): <1 / 61 Mio
         $aExpectedResult = array(
             'Server: server1 (~0s)
 Number of transferred files ( / total): 2 / 1774
-Total transferred file size ( / total): <1 / 61 Mio',
+Total transferred file size ( / total): 178 o / 61 Mio',
             'Server: login@server2 (~0s)
 Number of transferred files ( / total): 2 / 177
-Total transferred file size ( / total): <1 / 626 Kio',
+Total transferred file size ( / total): 178 o / 626 Kio',
         );
         $aMkdirExecResult = array(
             '---[server1]-->0|0s', '[CMD]', '...', '[OUT]', '[ERR]', '///',
@@ -1613,18 +1614,18 @@ Total transferred file size ( / total): <1 / 626 Kio',
     public function testSync_RemoteDirToMultiRemotesDirWithDifferentHost ()
     {
         $aExpectedResult = array(
-            'Server: aai-01 (~0s)
+            'Server: server1 (~0s)
 Number of transferred files ( / total): 2 / 1774
-Total transferred file size ( / total): <1 / 61 Mio',
-            'Server: aai@aai-02 (~0s)
+Total transferred file size ( / total): 178 o / 61 Mio',
+            'Server: user1@server2 (~0s)
 Number of transferred files ( / total): 2 / 177
-Total transferred file size ( / total): <1 / 6 Kio',
+Total transferred file size ( / total): 178 o / 6 Kio',
         );
         $aMkdirExecResult = array(
-            '---[aai-01]-->0|0s', '[CMD]', '...', '[OUT]', '[ERR]', '///',
-            '---[aai@aai-02]-->0|0s', '[CMD]', '...', '[OUT]', '[ERR]', '///'
+            '---[server1]-->0|0s', '[CMD]', '...', '[OUT]', '[ERR]', '///',
+            '---[user1@server2]-->0|0s', '[CMD]', '...', '[OUT]', '[ERR]', '///'
         );
-        $aExecResult = array('---[aai-01]-->0|0s', '[CMD]', '...', '[OUT]',
+        $aExecResult = array('---[server1]-->0|0s', '[CMD]', '...', '[OUT]',
             'Number of files: 1774',
             'Number of files transferred: 2',
             'Total file size: 64093953 bytes',
@@ -1641,7 +1642,7 @@ Total transferred file size ( / total): <1 / 6 Kio',
             'total size is 64093953  speedup is 1618.29',
             '[ERR]', '///',
 
-            '---[aai@aai-02]-->0|0s', '[CMD]', '...', '[OUT]',
+            '---[user1@server2]-->0|0s', '[CMD]', '...', '[OUT]',
             'Number of files: 177',
             'Number of files transferred: 2',
             'Total file size: 6409 bytes',
@@ -1662,18 +1663,18 @@ Total transferred file size ( / total): <1 / 6 Kio',
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->at(0))->method('exec')
             ->with($this->equalTo($this->_aConfig['bash_path'] . ' '
-                . $this->_aConfig['lib_dir'] . '/parallelize.inc.sh "aai-01 aai@aai-02" "ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes -T [] /bin/bash <<EOF' . "\n"
+                . $this->_aConfig['lib_dir'] . '/parallelize.inc.sh "server1 user1@server2" "ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes -T [] /bin/bash <<EOF' . "\n"
                 . 'mkdir -p \"/destpath/to/my dir\"' . "\n"
                 . 'EOF' . "\n" . '"'))
             ->will($this->returnValue($aMkdirExecResult));
         $oMockShell->expects($this->at(1))->method('exec')
-            ->with($this->equalTo($this->_aConfig['bash_path'] . ' ' . $this->_aConfig['lib_dir'] . '/parallelize.inc.sh "aai-01 aai@aai-02" "ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes -T user@server1 /bin/bash <<EOF' . "\n"
+            ->with($this->equalTo($this->_aConfig['bash_path'] . ' ' . $this->_aConfig['lib_dir'] . '/parallelize.inc.sh "server1 user1@server2" "ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes -T user@server1 /bin/bash <<EOF' . "\n"
                 . 'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --stats -e ssh \"/srcpath/to/my dir\" \"[]:/destpath/to/my dir\"' . "\n"
                 . 'EOF' . "\n" . '"'))
             ->will($this->returnValue($aExecResult));
         $oMockShell->expects($this->exactly(2))->method('exec');
 
-        $aResult = $oMockShell->sync('user@server1:/srcpath/to/my dir', '[]:/destpath/to/my dir', array('aai-01', 'aai@aai-02'));
+        $aResult = $oMockShell->sync('user@server1:/srcpath/to/my dir', '[]:/destpath/to/my dir', array('server1', 'user1@server2'));
 
         $this->assertEquals(
             array_map(function($s){return preg_replace('/\s/', '', $s);}, $aExpectedResult),

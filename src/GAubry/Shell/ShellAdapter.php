@@ -8,10 +8,6 @@ use \GAubry\Helpers\Helpers;
 
 /**
  * Classe outil facilitant l'exécution des commandes shell.
- *
- * @category TwengaDeploy
- * @package Lib
- * @author Geoffroy AUBRY <geoffroy.aubry@twenga.com>
  */
 class ShellAdapter implements ShellInterface
 {
@@ -40,6 +36,37 @@ class ShellAdapter implements ShellInterface
      */
     private $_oLogger;
 
+    /**
+     * Default configuration.
+     *
+     * @var array
+     */
+    private static $aDefaultConfig = array(
+        // (int) Nombre maximal de processus lancés en parallèle par parallelize.inc.sh :
+        'parallelization_max_nb_processes' => 10,
+
+        // (string) Chemin vers le shell bash :
+        'bash_path' => '/bin/bash',
+
+        // (string) Répertoire des bibliothèques utilisées par l'application :
+        'lib_dir' => '/path/to/lib',
+
+        // (int) Nombre de secondes avant timeout lors d'une connexion SSH :
+        'ssh_connection_timeout' => 10,
+
+        // (string) Chemin du répertoire temporaire système utilisable par l'application :
+        'tmp_dir' => '/path/to/tmp',
+
+        // (int) Nombre maximal d'exécutions shell rsync en parallèle.
+        // Prioritaire sur 'parallelization_max_nb_processes'.
+        'rsync_max_nb_processes' => 5
+    );
+
+    /**
+     * Current configuration.
+     * @var array
+     * @see Shell::$aDefaultConfig
+     */
     private $_aConfig;
 
     /**
@@ -52,11 +79,12 @@ class ShellAdapter implements ShellInterface
      * Constructeur.
      *
      * @param \Psr\Log\LoggerInterface $oLogger Instance utilisée pour loguer les commandes exécutées
+     * @param array $aConfig see self::$aDefaultConfig
      */
-    public function __construct (LoggerInterface $oLogger, array $aConfig)
+    public function __construct (LoggerInterface $oLogger, array $aConfig = array())
     {
         $this->_oLogger = $oLogger;
-        $this->_aConfig = $aConfig;
+        $this->_aConfig = Helpers::arrayMergeRecursiveDistinct(self::$aDefaultConfig, $aConfig);
         $this->_aFileStatus = array();
 
         $this->_sSSHOptions = ' -o StrictHostKeyChecking=no'
@@ -69,7 +97,7 @@ class ShellAdapter implements ShellInterface
      * Plusieurs lots de processus parallèles peuvent être générés si le nombre de valeurs
      * dépasse la limite $iMax.
      *
-     * Exemple : $this->parallelize(array('aai@aai-01', 'prod@aai-01'), "ssh [] /bin/bash <<EOF\nls -l\nEOF\n", 2);
+     * Exemple : $this->parallelize(array('user1@server', 'user2@server'), "ssh [] /bin/bash <<EOF\nls -l\nEOF\n", 2);
      * Exemple : $this->parallelize(array('a', 'b'), 'cat /.../resources/[].txt', 2);
      *
      * @param array $aValues liste de valeurs qui viendront remplacer le(s) '[]' du pattern
@@ -160,7 +188,7 @@ class ShellAdapter implements ShellInterface
      */
     public function exec ($sCmd)
     {
-        $this->_oLogger->log(LogLevel::DEBUG, '[DEBUG] shell# ' . trim($sCmd, " \t"));
+        $this->_oLogger->debug('[DEBUG] shell# ' . trim($sCmd, " \t"));
         $sFullCmd = '( ' . $sCmd . ' ) 2>&1';
         exec($sFullCmd, $aResult, $iReturnCode);
         if ($iReturnCode !== 0) {
@@ -658,7 +686,7 @@ class ShellAdapter implements ShellInterface
                 $aResult[] = 'Number of transferred files ( / total): ' . $aStats['number of files transferred']
                            . ' / ' . $aStats['number of files'] . "\n"
                            . 'Total transferred file size ( / total): '
-                           . $sTransferred . ' ' . $sTransfUnit . 'o / ' . $sTotal . ' ' . $sTotalUnit . 'o';
+                           . $sTransferred . ' ' . $sTransfUnit . 'o / ' . round($sTotal) . ' ' . $sTotalUnit . 'o';
             }
         }
         return $aResult;
