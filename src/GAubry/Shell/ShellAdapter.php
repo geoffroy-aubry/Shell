@@ -610,8 +610,8 @@ class ShellAdapter implements ShellInterface
                          . ' (~' . $aServerResult['elapsed_time'] . 's)' . "\n";
             }
             $aRawOutput = explode("\n", $aServerResult['output']);
-            $aOutput = $this->_resumeSyncResult($aRawOutput);
-            $aOutput = array($sHeader . $aOutput[0]);
+            $sOutput = $this->_resumeSyncResult($aRawOutput);
+            $aOutput = array($sHeader . $sOutput);
             $aAllResults = array_merge($aAllResults, $aOutput);
         }
 
@@ -647,7 +647,7 @@ class ShellAdapter implements ShellInterface
     private function _resumeSyncResult (array $aRawResult)
     {
         if (count($aRawResult) === 0 || (count($aRawResult) === 1 && $aRawResult[0] == '')) {
-            $aResult = array('Empty source directory.');
+            $sResult = 'Empty source directory.';
         } else {
             $aKeys = array(
                 'number of files',
@@ -657,38 +657,25 @@ class ShellAdapter implements ShellInterface
             );
             $aEmptyStats = array_fill_keys($aKeys, '?');
 
-            $aAllStats = array();
-            $aStats = NULL;
+            $aStats = $aEmptyStats;
             foreach ($aRawResult as $sLine) {
                 if (preg_match('/^([^:]+):\s(\d+)\b/i', $sLine, $aMatches) === 1) {
                     $sKey = strtolower($aMatches[1]);
-                    if ($sKey === 'number of files') {
-                        if ($aStats !== NULL) {
-                            $aAllStats[] = $aStats;
-                        }
-                        $aStats = $aEmptyStats;
-                    }
                     if (isset($aStats[$sKey])) {
                         $aStats[$sKey] = (int)$aMatches[2];
                     }
                 }
             }
-            if ($aStats !== NULL) {
-                $aAllStats[] = $aStats;
-            }
 
-            $aResult = array();
-            foreach ($aAllStats as $aStats) {
-                list($sTransferred, $sTransfUnit) =
-                    Helpers::intToMultiple($aStats['total transferred file size'], true);
-                list($sTotal, $sTotalUnit) = Helpers::intToMultiple($aStats['total file size'], true);
+            list($sTransferred, $sTransfUnit) =
+                Helpers::intToMultiple($aStats['total transferred file size'], true);
+            list($sTotal, $sTotalUnit) = Helpers::intToMultiple($aStats['total file size'], true);
 
-                $aResult[] = 'Number of transferred files ( / total): ' . $aStats['number of files transferred']
-                           . ' / ' . $aStats['number of files'] . "\n"
-                           . 'Total transferred file size ( / total): '
-                           . $sTransferred . ' ' . $sTransfUnit . 'o / ' . round($sTotal) . ' ' . $sTotalUnit . 'o';
-            }
+            $sResult = 'Number of transferred files ( / total): ' . $aStats['number of files transferred']
+                     . ' / ' . $aStats['number of files'] . "\n"
+                     . 'Total transferred file size ( / total): '
+                     . $sTransferred . ' ' . $sTransfUnit . 'o / ' . round($sTotal) . ' ' . $sTotalUnit . 'o';
         }
-        return $aResult;
+        return $sResult;
     }
 }
