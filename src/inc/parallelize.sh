@@ -1,14 +1,14 @@
 #!/bin/bash
 # @author Geoffroy AUBRY <geoffroy.aubry@free.fr>
-# Example: /bin/bash parallelize.inc.sh "user@server" "ssh [] /bin/bash <<EOF\nls -l\nEOF\n"
-# Example: time /bin/bash parallelize.inc.sh "1 2 3 4" "sleep []"
+# Example: /bin/bash parallelize.sh "user@server" "ssh [] /bin/bash <<EOF\nls -l\nEOF\n"
+# Example: time /bin/bash parallelize.sh "1 2 3 4" "sleep []"
 
 uid="$(date +'%Y%m%d%H%M%S')_$(printf '%05d' $RANDOM)"
 values="$1"; shift
 pattern="$@"
 
 if [ -z "$values" ] || [ -z "$pattern" ]; then
-    echo 'Usage: /bin/bash parallelize.inc.sh "host1 user@host2 ..." "cmd where [] will be replace by hosts"'
+    echo 'Usage: /bin/bash parallelize.sh "host1 user@host2 ..." "cmd where [] will be replace by hosts"'
     echo 'Missing parameters!' >&2
     exit 1
 fi

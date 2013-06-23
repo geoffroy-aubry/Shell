@@ -42,14 +42,11 @@ class ShellAdapter implements ShellInterface
      * @var array
      */
     private static $aDefaultConfig = array(
-        // (int) Nombre maximal de processus lancés en parallèle par parallelize.inc.sh :
+        // (int) Nombre maximal de processus lancés en parallèle par parallelize.sh :
         'parallelization_max_nb_processes' => 10,
 
         // (string) Chemin vers le shell bash :
         'bash_path' => '/bin/bash',
-
-        // (string) Répertoire des bibliothèques utilisées par l'application :
-        'lib_dir' => '/path/to/lib',
 
         // (int) Nombre de secondes avant timeout lors d'une connexion SSH :
         'ssh_connection_timeout' => 10,
@@ -75,6 +72,8 @@ class ShellAdapter implements ShellInterface
      */
     private $_sSSHOptions;
 
+    private $sParallelizeCmdPattern;
+
     /**
      * Constructeur.
      *
@@ -90,6 +89,8 @@ class ShellAdapter implements ShellInterface
         $this->_sSSHOptions = ' -o StrictHostKeyChecking=no'
                             . ' -o ConnectTimeout=' . $this->_aConfig['ssh_connection_timeout']
                             . ' -o BatchMode=yes';
+        $this->sParallelizeCmdPattern = $this->_aConfig['bash_path']
+                                      . ' ' . realpath(__DIR__ . '/../../inc/parallelize.sh') . ' "%s" "%s"';
     }
 
     /**
@@ -130,9 +131,11 @@ class ShellAdapter implements ShellInterface
         }
 
         // Exécution de la demande de parallélisation :
-        $sCmdPattern = $this->_aConfig['bash_path'] . ' ' . $this->_aConfig['lib_dir']
-                     . '/parallelize.inc.sh "%s" "%s"';
-        $sCmd = sprintf($sCmdPattern, addcslashes(implode(' ', $aValues), '"'), addcslashes($sPattern, '"'));
+        $sCmd = sprintf(
+            $this->sParallelizeCmdPattern,
+            addcslashes(implode(' ', $aValues), '"'),
+            addcslashes($sPattern, '"')
+        );
         $aExecResult = $this->exec($sCmd);
 
         // Découpage du flux de retour d'exécution :

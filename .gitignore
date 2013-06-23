@@ -6,3 +6,4 @@
 /vendor/
 composer.phar
 /conf/config.php
+/.twgit_features_subject
