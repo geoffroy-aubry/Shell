@@ -2,9 +2,9 @@
 
 namespace GAubry\Logger\Tests;
 
-use \GAubry\Shell\ShellAdapter;
-use \GAubry\Logger\MinimalLogger;
-use \Psr\Log\LogLevel;
+use GAubry\Shell\ShellAdapter;
+use GAubry\Logger\MinimalLogger;
+use Psr\Log\LogLevel;
 use GAubry\Shell\PathStatus;
 
 class ShellAdapterTest extends \PHPUnit_Framework_TestCase

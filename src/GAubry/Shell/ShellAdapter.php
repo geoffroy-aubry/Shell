@@ -2,9 +2,9 @@
 
 namespace GAubry\Shell;
 
-use \Psr\Log\LoggerInterface;
-use \Psr\Log\LogLevel;
-use \GAubry\Helpers\Helpers;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
+use GAubry\Helpers\Helpers;
 
 /**
  * Classe outil facilitant l'exécution des commandes shell.
