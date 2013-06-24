@@ -516,7 +516,6 @@ class ShellAdapter implements ShellInterface
      * @param array $aValues liste de valeurs (string) optionnelles pour générer autant de demandes de
      * synchronisation en parallèle. Dans ce cas ces valeurs viendront remplacer l'une après l'autre
      * les occurences de crochets vide '[]' présents dans $sSrcPath ou $sDestPath.
-     * @return array tableau indexé du flux de sortie shell découpé par ligne
      * @throws RuntimeException en cas d'erreur shell
      */
     public function mkdir ($sPath, $sMode='', array $aValues=array())
@@ -533,21 +532,15 @@ class ShellAdapter implements ShellInterface
             $aParallelResult = $this->parallelize($aValues, $sCmd, $this->_aConfig['parallelization_max_nb_processes']);
 
             // Traiter les résultats et MAJ le cache :
-            $aResult = array();
             foreach ($aParallelResult as $aServerResult) {
                 $sValue = $aServerResult['value'];
-                $sOutput = $aServerResult['output'];
                 $sFinalPath = str_replace('[]', $sValue, $sPath);
                 $this->_aFileStatus[$sFinalPath] = PathStatus::STATUS_DIR;
-                if (strlen($sOutput) > 0) {
-                    $aResult[] = "$sValue: $sOutput";
-                }
             }
         } else {
-            $aResult = $this->exec($sCmd);
+            $this->exec($sCmd);
             $this->_aFileStatus[$sPath] = PathStatus::STATUS_DIR;
         }
-        return $aResult;
     }
 
     /**

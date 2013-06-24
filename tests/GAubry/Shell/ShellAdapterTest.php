@@ -5,6 +5,7 @@ namespace GAubry\Logger\Tests;
 use \GAubry\Shell\ShellAdapter;
 use \GAubry\Logger\MinimalLogger;
 use \Psr\Log\LogLevel;
+use GAubry\Shell\PathStatus;
 
 class ShellAdapterTest extends \PHPUnit_Framework_TestCase
 {
@@ -564,13 +565,36 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
 
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->at(0))->method('exec')
-            ->with($this->equalTo('mkdir -p "/path/to/my file"'))
-            ->will($this->returnValue($aExpectedResult));
+            ->with($this->equalTo('mkdir -p "/path/to/my file"'));
         $oMockShell->expects($this->exactly(1))->method('exec');
 
-        $aResult = $oMockShell->mkdir('/path/to/my file');
-        $this->assertEquals($aExpectedResult, $aResult);
-        $this->assertAttributeEquals(array('/path/to/my file' => 2), '_aFileStatus', $oMockShell);
+        $oMockShell->mkdir('/path/to/my file');
+        $this->assertAttributeEquals(array('/path/to/my file' => PathStatus::STATUS_DIR), '_aFileStatus', $oMockShell);
+    }
+
+    /**
+     * @covers \GAubry\Shell\ShellAdapter::mkdir
+     */
+    public function testMkdir_WithMultipleLocalPaths ()
+    {
+        $sCmd = sprintf(
+            $this->sParallelizeCmdPattern,
+            '1 2 3',
+            'mkdir -p \"/path/to/[]\"'
+        );
+        $aReturnExec = array(
+            '---[1]-->0|0s', '[CMD]', 'mkdir -p "/path/to/1"', '[OUT]', 'foo', '[ERR]', '///',
+            '---[2]-->0|0s', '[CMD]', 'mkdir -p "/path/to/2"', '[OUT]', '[ERR]', '///',
+            '---[3]-->0|0s', '[CMD]', 'mkdir -p "/path/to/3"', '[OUT]', '[ERR]', '///',
+        );
+        $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
+        $oMockShell->expects($this->at(0))->method('exec')
+            ->with($this->equalTo($sCmd))
+            ->will($this->returnValue($aReturnExec));
+        $oMockShell->expects($this->exactly(1))->method('exec');
+
+        $oMockShell->mkdir('/path/to/[]', '', array(1, 2, 3));
+        $this->assertAttributeEquals(array('/path/to/1' => PathStatus::STATUS_DIR, '/path/to/2' => PathStatus::STATUS_DIR, '/path/to/3' => PathStatus::STATUS_DIR), '_aFileStatus', $oMockShell);
     }
 
     /**
@@ -582,8 +606,8 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
         $oMockShell->expects($this->at(0))->method('exec')
             ->with($this->equalTo('mkdir -p "/path/to/my file" && chmod 777 "/path/to/my file"'));
         $oMockShell->expects($this->exactly(1))->method('exec');
-        $aResult = $oMockShell->mkdir('/path/to/my file', '777');
-        $this->assertAttributeEquals(array('/path/to/my file' => 2), '_aFileStatus', $oMockShell);
+        $oMockShell->mkdir('/path/to/my file', '777');
+        $this->assertAttributeEquals(array('/path/to/my file' => PathStatus::STATUS_DIR), '_aFileStatus', $oMockShell);
     }
 
     /**
@@ -600,8 +624,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
         $oMockShell->expects($this->exactly(1))->method('exec');
 
         $aResult = $oMockShell->mkdir('gaubry@dv2:/path/to/my file');
-        $this->assertEquals($aExpectedResult, $aResult);
-        $this->assertAttributeEquals(array('gaubry@dv2:/path/to/my file' => 2), '_aFileStatus', $oMockShell);
+        $this->assertAttributeEquals(array('gaubry@dv2:/path/to/my file' => PathStatus::STATUS_DIR), '_aFileStatus', $oMockShell);
     }
 
     /**
@@ -613,8 +636,8 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
         $oMockShell->expects($this->at(0))->method('exec')
             ->with($this->equalTo('ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes -T gaubry@dv2 /bin/bash <<EOF' . "\n" . 'mkdir -p "/path/to/my file" && chmod 777 "/path/to/my file"' . "\n" . 'EOF' . "\n"));
         $oMockShell->expects($this->exactly(1))->method('exec');
-        $aResult = $oMockShell->mkdir('gaubry@dv2:/path/to/my file', '777');
-        $this->assertAttributeEquals(array('gaubry@dv2:/path/to/my file' => 2), '_aFileStatus', $oMockShell);
+        $oMockShell->mkdir('gaubry@dv2:/path/to/my file', '777');
+        $this->assertAttributeEquals(array('gaubry@dv2:/path/to/my file' => PathStatus::STATUS_DIR), '_aFileStatus', $oMockShell);
     }
 
     /**
