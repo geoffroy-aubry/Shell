@@ -287,7 +287,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->exactly(1))->method('exec');
         $oMockShell->expects($this->at(0))->method('exec')->will($this->throwException(new \RuntimeException('aborted!')));
-        $this->setExpectedException('RuntimeException', 'aborted!');
+        $this->setExpectedException('\RuntimeException', 'aborted!');
         $oMockShell->parallelize(
             array('a', 'b'),
             'cat ' . $this->_aResourcesDir . '/testParallelize_[].txt',
@@ -385,7 +385,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
     public function testParallelize_ThrowExceptionOnShellExitCodeNotNull ()
     {
         $this->setExpectedException(
-            'RuntimeException',
+            '\RuntimeException',
             'cat: ' . $this->_aResourcesDir . '/not_exists.txt: No such file or directory'
         );
         $aResult = $this->oShell->parallelize(
@@ -401,7 +401,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
     public function testParallelize_ThrowExceptionWhenNotAskedValue ()
     {
         $this->setExpectedException(
-            'RuntimeException',
+            '\RuntimeException',
             "Not asked value: 'not_asked'!"
         );
         $aReturnExec = array('---[not_asked]-->0|0s', '[CMD]', 'foo', '[OUT]', '1', '[ERR]', '///');
@@ -424,7 +424,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
     public function testParallelize_ThrowExceptionWhenMissingValues ()
     {
         $this->setExpectedException(
-            'RuntimeException',
+            '\RuntimeException',
             'Missing values!'
         );
         $aReturnExec = array('---[a]-->0|0s', '[CMD]', 'foo', '[OUT]', '1', '[ERR]', '///');
@@ -446,7 +446,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
      */
     public function testExec_ThrowExceptionOnShellError ()
     {
-        $this->setExpectedException('RuntimeException', "abc\ndef", 101);
+        $this->setExpectedException('\RuntimeException', "abc\ndef", 101);
         $aResult = $this->oShell->exec('echo abc; echo def; exit 101');
     }
 
@@ -486,7 +486,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->exactly(1))->method('exec');
         $oMockShell->expects($this->at(0))->method('exec')->will($this->throwException(new \RuntimeException('aborted!')));
-        $this->setExpectedException('RuntimeException', 'aborted!');
+        $this->setExpectedException('\RuntimeException', 'aborted!');
         $oMockShell->execSSH('foo', 'bar');
     }
 
@@ -552,7 +552,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->exactly(1))->method('exec');
         $oMockShell->expects($this->at(0))->method('exec')->will($this->throwException(new \RuntimeException('aborted!')));
-        $this->setExpectedException('RuntimeException', 'aborted!');
+        $this->setExpectedException('\RuntimeException', 'aborted!');
         $oMockShell->mkdir('foo');
     }
 
@@ -648,7 +648,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->exactly(1))->method('exec');
         $oMockShell->expects($this->at(0))->method('exec')->will($this->throwException(new \RuntimeException('aborted!')));
-        $this->setExpectedException('RuntimeException', 'aborted!');
+        $this->setExpectedException('\RuntimeException', 'aborted!');
         $oMockShell->remove('foo/bar');
     }
 
@@ -658,7 +658,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
     public function testRemove_ThrowExceptionWhenTooShortPath ()
     {
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
-        $this->setExpectedException('DomainException', "Illegal path: 'foo'");
+        $this->setExpectedException('\DomainException', "Illegal path: 'foo'");
         $oMockShell->remove('foo');
     }
 
@@ -737,7 +737,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->exactly(1))->method('exec');
         $oMockShell->expects($this->at(0))->method('exec')->will($this->throwException(new \RuntimeException('aborted!')));
-        $this->setExpectedException('RuntimeException', 'aborted!');
+        $this->setExpectedException('\RuntimeException', 'aborted!');
         $oMockShell->copy('foo', 'bar', false);
     }
 
@@ -858,7 +858,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->exactly(1))->method('exec');
         $oMockShell->expects($this->at(0))->method('exec')->will($this->throwException(new \RuntimeException('aborted!')));
-        $this->setExpectedException('RuntimeException', 'aborted!');
+        $this->setExpectedException('\RuntimeException', 'aborted!');
         $oMockShell->getPathStatus('foo');
     }
 
@@ -1072,7 +1072,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->exactly(1))->method('exec');
         $oMockShell->expects($this->at(0))->method('exec')->will($this->throwException(new \RuntimeException('aborted!')));
-        $this->setExpectedException('RuntimeException', 'aborted!');
+        $this->setExpectedException('\RuntimeException', 'aborted!');
         $oMockShell->sync('foo', 'bar');
     }
 
@@ -1741,14 +1741,6 @@ Total transferred file size ( / total): 178 o / 6 Kio',
     }
 
     /**
-     * @covers \GAubry\Shell\ShellAdapter::sync
-     */
-    /*public function testSyncRemoteDirToLocalDirsThrowException () {
-        $this->setExpectedException('RuntimeException', 'Not yet implemented!');
-        $this->oShell->sync('user@server1:/srcpath/to/my dir', '/destpath/to/my dir[]', array('1', '2'));
-    }*/
-
-    /**
      * @covers \GAubry\Shell\ShellAdapter::createLink
      */
     public function testCreateLink_ThrowExceptionWhenExecFailed ()
@@ -1756,7 +1748,7 @@ Total transferred file size ( / total): 178 o / 6 Kio',
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->exactly(1))->method('exec');
         $oMockShell->expects($this->at(0))->method('exec')->will($this->throwException(new \RuntimeException('aborted!')));
-        $this->setExpectedException('RuntimeException', 'aborted!');
+        $this->setExpectedException('\RuntimeException', 'aborted!');
         $oMockShell->createLink('foo', 'bar');
     }
 
@@ -1766,7 +1758,7 @@ Total transferred file size ( / total): 178 o / 6 Kio',
     public function testCreateLink_ThrowExceptionWhenDifferentHosts1 ()
     {
         $this->setExpectedException(
-            'DomainException',
+            '\DomainException',
             "Hosts must be equals. Link='/foo'. Target='server:/bar'."
         );
         $this->oShell->createLink('/foo', 'server:/bar');
@@ -1778,7 +1770,7 @@ Total transferred file size ( / total): 178 o / 6 Kio',
     public function testCreateLink_ThrowExceptionWhenDifferentHosts2 ()
     {
         $this->setExpectedException(
-            'DomainException',
+            '\DomainException',
             "Hosts must be equals. Link='user@server:/foo'. Target='/bar'."
         );
         $this->oShell->createLink('user@server:/foo', '/bar');
@@ -1790,7 +1782,7 @@ Total transferred file size ( / total): 178 o / 6 Kio',
     public function testCreateLink_ThrowExceptionWhenDifferentHosts3 ()
     {
         $this->setExpectedException(
-            'DomainException',
+            '\DomainException',
             "Hosts must be equals. Link='server1:/foo'. Target='server2:/bar'."
         );
         $this->oShell->createLink('server1:/foo', 'server2:/bar');

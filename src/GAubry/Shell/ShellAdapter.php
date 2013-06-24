@@ -112,9 +112,9 @@ class ShellAdapter implements ShellInterface
      *         'error' => (string) sortie d'erreur standard,
      *     ), ...
      * )
-     * @throws RuntimeException si le moindre code de retour Shell non nul apparaît.
-     * @throws RuntimeException si une valeur hors de $aValues apparaît dans les entrées 'value'.
-     * @throws RuntimeException s'il manque des valeurs de $aValues dans le résultat final.
+     * @throws \RuntimeException si le moindre code de retour Shell non nul apparaît.
+     * @throws \RuntimeException si une valeur hors de $aValues apparaît dans les entrées 'value'.
+     * @throws \RuntimeException s'il manque des valeurs de $aValues dans le résultat final.
      */
     public function parallelize (array $aValues, $sPattern, $iMax)
     {
@@ -184,7 +184,7 @@ class ShellAdapter implements ShellInterface
      *
      * @param string $sCmd
      * @return array tableau indexé du flux de sortie shell découpé par ligne
-     * @throws RuntimeException en cas d'erreur shell
+     * @throws \RuntimeException en cas d'erreur shell
      */
     public function exec ($sCmd)
     {
@@ -208,7 +208,7 @@ class ShellAdapter implements ShellInterface
      * @param string $sParam paramètre du pattern $sPatternCmd, permettant en plus de décider si l'on
      * doit encapsuler la commande dans un SSH (si serveur distant) ou non.
      * @return array tableau indexé du flux de sortie shell découpé par ligne
-     * @throws RuntimeException en cas d'erreur shell
+     * @throws \RuntimeException en cas d'erreur shell
      * @see isRemotePath()
      */
     public function execSSH ($sPatternCmd, $sParam)
@@ -254,7 +254,7 @@ class ShellAdapter implements ShellInterface
      *
      * @param string $sPath chemin à tester, de la forme [user@server:]/path
      * @return int l'une des constantes de Shell_PathStatus
-     * @throws RuntimeException en cas d'erreur shell
+     * @throws \RuntimeException en cas d'erreur shell
      * @see Shell_PathStatus
      * @see _aFileStatus
      */
@@ -291,7 +291,7 @@ class ShellAdapter implements ShellInterface
      * @param string $sPath chemin à tester, sans mention de serveur
      * @param array $aServers liste de serveurs sur lesquels faire la demande de statut
      * @return array tableau associatif listant par serveur (clé) le status (valeur, constante de Shell_PathStatus)
-     * @throws RuntimeException en cas d'erreur shell
+     * @throws \RuntimeException en cas d'erreur shell
      * @see getPathStatus()
      */
     public function getParallelSSHPathStatus ($sPath, array $aServers)
@@ -366,7 +366,7 @@ class ShellAdapter implements ShellInterface
      * @param bool $bIsDestFile précise si le chemin de destination est un simple fichier ou non,
      * information nécessaire si l'on doit créer une partie de ce chemin si inexistant
      * @return array tableau indexé du flux de sortie shell découpé par ligne
-     * @throws RuntimeException en cas d'erreur shell
+     * @throws \RuntimeException en cas d'erreur shell
      */
     public function copy ($sSrcPath, $sDestPath, $bIsDestFile=false)
     {
@@ -394,8 +394,8 @@ class ShellAdapter implements ShellInterface
      * @param string $sLinkPath nom du lien, au format [[user@]hostname_or_ip:]/path
      * @param string $sTargetPath cible sur laquelle faire pointer le lien, au format [[user@]hostname_or_ip:]/path
      * @return array tableau indexé du flux de sortie shell découpé par ligne
-     * @throws DomainException si les chemins référencent des serveurs différents
-     * @throws RuntimeException en cas d'erreur shell
+     * @throws \DomainException si les chemins référencent des serveurs différents
+     * @throws \RuntimeException en cas d'erreur shell
      */
     public function createLink ($sLinkPath, $sTargetPath)
     {
@@ -431,8 +431,8 @@ class ShellAdapter implements ShellInterface
      *
      * @param string $sPath chemin à supprimer, au format [[user@]hostname_or_ip:]/path
      * @return array tableau indexé du flux de sortie shell découpé par ligne
-     * @throws DomainException si chemin invalide (garde-fou)
-     * @throws RuntimeException en cas d'erreur shell
+     * @throws \DomainException si chemin invalide (garde-fou)
+     * @throws \RuntimeException en cas d'erreur shell
      * @see getPathStatus()
      */
     public function remove ($sPath)
@@ -461,7 +461,7 @@ class ShellAdapter implements ShellInterface
      * @param string $sSrcPath au format [[user@]hostname_or_ip:]/path
      * @param string $sBackupPath au format [[user@]hostname_or_ip:]/path
      * @return array tableau indexé du flux de sortie shell découpé par ligne
-     * @throws RuntimeException en cas d'erreur shell
+     * @throws \RuntimeException en cas d'erreur shell
      */
     public function backup ($sSrcPath, $sBackupPath)
     {
@@ -513,7 +513,7 @@ class ShellAdapter implements ShellInterface
      * @param array $aValues liste de valeurs (string) optionnelles pour générer autant de demandes de
      * synchronisation en parallèle. Dans ce cas ces valeurs viendront remplacer l'une après l'autre
      * les occurences de crochets vide '[]' présents dans $sSrcPath ou $sDestPath.
-     * @throws RuntimeException en cas d'erreur shell
+     * @throws \RuntimeException en cas d'erreur shell
      */
     public function mkdir ($sPath, $sMode='', array $aValues=array())
     {
@@ -553,8 +553,8 @@ class ShellAdapter implements ShellInterface
      * @param array $aExcludedPaths chemins à transmettre aux paramètres --exclude de la commande shell rsync
      * @return array tableau indexé du flux de sortie shell des commandes rsync exécutées,
      * découpé par ligne et analysé par _resumeSyncResult()
-     * @throws RuntimeException en cas d'erreur shell
-     * @throws RuntimeException car non implémenté quand plusieurs $mDestPath et $sSrcPath sont distants
+     * @throws \RuntimeException en cas d'erreur shell
+     * @throws \RuntimeException car non implémenté quand plusieurs $mDestPath et $sSrcPath sont distants
      */
     public function sync ($sSrcPath, $sDestPath, array $aValues=array(),
             array $aIncludedPaths=array(), array $aExcludedPaths=array(),
