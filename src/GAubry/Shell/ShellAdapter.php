@@ -48,8 +48,8 @@ class ShellAdapter implements ShellInterface
         // (string) Chemin vers le shell bash :
         'bash_path' => '/bin/bash',
 
-        // (int) Nombre de secondes avant timeout lors d'une connexion SSH :
-        'ssh_connection_timeout' => 10,
+        // Options de type "[-o ssh_option]" à ajouter à chaque commande SSH ou SCP.
+        'ssh_options' => '-o ServerAliveInterval=10 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes',
 
         // (int) Nombre maximal d'exécutions shell rsync en parallèle.
         // Prioritaire sur 'parallelization_max_nb_processes'.
@@ -82,10 +82,6 @@ class ShellAdapter implements ShellInterface
         $this->_oLogger = $oLogger;
         $this->_aConfig = Helpers::arrayMergeRecursiveDistinct(self::$aDefaultConfig, $aConfig);
         $this->_aFileStatus = array();
-
-        $this->_sSSHOptions = ' -o StrictHostKeyChecking=no'
-                            . ' -o ConnectTimeout=' . $this->_aConfig['ssh_connection_timeout']
-                            . ' -o BatchMode=yes';
         $this->sParallelizeCmdPattern = $this->_aConfig['bash_path']
                                       . ' ' . realpath(__DIR__ . '/../../inc/parallelize.sh') . ' "%s" "%s"';
     }
@@ -235,7 +231,7 @@ class ShellAdapter implements ShellInterface
         $sCmd = sprintf($sPatternCmd, $this->escapePath($sRealPath));
         //$sCmd = vsprintf($sPatternCmd, array_map(array(self, 'escapePath'), $mParams));
         if ($bIsRemote) {
-            $sCmd = 'ssh' . $this->_sSSHOptions . " -T $sServer "
+            $sCmd = 'ssh ' . $this->_aConfig['ssh_options'] . " -T $sServer "
                   . $this->_aConfig['bash_path'] . " <<EOF\n$sCmd\nEOF\n";
         }
         return $sCmd;
@@ -379,7 +375,7 @@ class ShellAdapter implements ShellInterface
         list(, $sDestServer, $sDestRealPath) = $this->isRemotePath($sDestPath);
 
         if ($sSrcServer != $sDestServer) {
-            $sCmd = 'scp' . $this->_sSSHOptions . ' -rpq '
+            $sCmd = 'scp ' . $this->_aConfig['ssh_options'] . ' -rpq '
                   . $this->escapePath($sSrcPath) . ' ' . $this->escapePath($sDestPath);
             return $this->exec($sCmd);
         } else {

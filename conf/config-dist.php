@@ -24,8 +24,8 @@ $aConfig = $aDirs + array(
         // (string) Chemin vers le shell bash :
         'bash_path' => '/bin/bash',
 
-        // (int) Nombre de secondes avant timeout lors d'une connexion SSH :
-        'ssh_connection_timeout' => 10,
+        // Options de type "[-o ssh_option]" à ajouter à chaque commande SSH ou SCP.
+        'ssh_options' => '-o ServerAliveInterval=10 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes',
 
         // (int) Nombre maximal d'exécutions shell rsync en parallèle.
         // Prioritaire sur 'parallelization_max_nb_processes'.
