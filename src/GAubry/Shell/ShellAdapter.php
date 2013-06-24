@@ -51,9 +51,6 @@ class ShellAdapter implements ShellInterface
         // (int) Nombre de secondes avant timeout lors d'une connexion SSH :
         'ssh_connection_timeout' => 10,
 
-        // (string) Chemin du répertoire temporaire système utilisable par l'application :
-        'tmp_dir' => '/path/to/tmp',
-
         // (int) Nombre maximal d'exécutions shell rsync en parallèle.
         // Prioritaire sur 'parallelization_max_nb_processes'.
         'rsync_max_nb_processes' => 5
@@ -472,7 +469,7 @@ class ShellAdapter implements ShellInterface
         list(, $sBackupServer, $sBackupRealPath) = $this->isRemotePath($sBackupPath);
 
         if ($sSrcServer != $sBackupServer) {
-            $sTmpDir = ($bIsSrcRemote ? $sSrcServer. ':' : '') . $this->_aConfig['tmp_dir'] . '/'
+            $sTmpDir = ($bIsSrcRemote ? $sSrcServer. ':' : '') . realpath(sys_get_temp_dir()) . '/'
                      . uniqid('deployment_', true);
             $sTmpPath = $sTmpDir . '/' . pathinfo($sBackupPath, PATHINFO_BASENAME);
             return array_merge(

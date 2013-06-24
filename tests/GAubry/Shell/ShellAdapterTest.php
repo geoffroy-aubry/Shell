@@ -822,13 +822,13 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
 
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->at(0))->method('exec')
-            ->with($this->equalTo('mkdir -p "' . $this->_aConfig['tmp_dir'] . '"'));
+            ->with($this->equalTo('mkdir -p "/local/path"'));
         $oMockShell->expects($this->at(1))->method('exec')
-            ->with($this->equalTo('scp -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes -rpq "server:/path/to/a"*".css" "' . $this->_aConfig['tmp_dir'] . '"'))
+            ->with($this->equalTo('scp -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes -rpq "server:/path/to/a"*".css" "/local/path"'))
             ->will($this->returnValue($aExpectedResult));
         $oMockShell->expects($this->exactly(2))->method('exec');
 
-        $aResult = $oMockShell->copy('server:/path/to/a*.css', $this->_aConfig['tmp_dir']);
+        $aResult = $oMockShell->copy('server:/path/to/a*.css', '/local/path');
         $this->assertEquals($aExpectedResult, $aResult);
     }
 
