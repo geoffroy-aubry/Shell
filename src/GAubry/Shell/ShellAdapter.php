@@ -21,15 +21,6 @@ class ShellAdapter implements ShellInterface
     private $_aFileStatus;
 
     /**
-     * Liste d'exclusions par défaut de toute commande rsync (traduits en --exclude xxx).
-     * @var array
-     * @see sync()
-     */
-    private static $_aDefaultRsyncExclude = array(
-        '.bzr/', '.cvsignore', '.git/', '.gitignore', '.svn/', 'cvslog.*', 'CVS', 'CVS.adm'
-    );
-
-    /**
      * Log adapter, utilisé pour loguer les commandes exécutées.
      * @var \Psr\Log\LoggerInterface
      * @see exec()
@@ -62,12 +53,6 @@ class ShellAdapter implements ShellInterface
      * @see Shell::$aDefaultConfig
      */
     private $_aConfig;
-
-    /**
-     * Options de type "[-o ssh_option]" à ajouter à chaque commande SSH ou SCP.
-     * @var string
-     */
-    private $_sSSHOptions;
 
     private $sParallelizeCmdPattern;
 
@@ -565,7 +550,7 @@ class ShellAdapter implements ShellInterface
         $sIncludedPaths = (count($aIncludedPaths) === 0
                               ? ''
                               : '--include="' . implode('" --include="', array_unique($aIncludedPaths)) . '" ');
-        $aExcludedPaths = array_unique(array_merge(self::$_aDefaultRsyncExclude, $aExcludedPaths));
+        $aExcludedPaths = array_unique(array_merge($this->_aConfig['default_rsync_exclude'], $aExcludedPaths));
         $sExcludedPaths = (count($aExcludedPaths) === 0
                               ? ''
                               : '--exclude="' . implode('" --exclude="', $aExcludedPaths) . '" ');

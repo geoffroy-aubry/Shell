@@ -29,7 +29,10 @@ $aConfig = $aDirs + array(
 
         // (int) Nombre maximal d'exécutions shell rsync en parallèle.
         // Prioritaire sur 'parallelization_max_nb_processes'.
-        'rsync_max_nb_processes' => 5
+        'rsync_max_nb_processes' => 5,
+
+        // (string) Liste d'exclusions par défaut de toute commande rsync (traduits en --exclude xxx).
+        'default_rsync_exclude' => array('.bzr/', '.cvsignore', '.git/', '.gitignore', '.svn/', 'cvslog.*', 'CVS', 'CVS.adm')
     )
 );
 
