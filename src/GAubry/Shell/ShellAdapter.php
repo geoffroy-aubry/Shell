@@ -2,22 +2,18 @@
 
 namespace GAubry\Shell;
 
-use \Psr\Log\LoggerInterface;
-use \Psr\Log\LogLevel;
-use \GAubry\Helpers\Helpers;
+use Psr\Log\LoggerInterface;
+use GAubry\Helpers\Helpers;
 
 /**
- * Classe outil facilitant l'exécution des commandes shell.
  *
- * @category TwengaDeploy
- * @package Lib
- * @author Geoffroy AUBRY <geoffroy.aubry@twenga.com>
  */
-class ShellAdapter implements ShellInterface
+class ShellAdapter
 {
 
     /**
-     * Table de hashage de mise en cache des demande de statuts de chemins système.
+     * Cache of status of file system paths.
+     *
      * @var array
      * @see getPathStatus()
      * @see Shell_PathStatus
@@ -25,52 +21,73 @@ class ShellAdapter implements ShellInterface
     private $_aFileStatus;
 
     /**
-     * Liste d'exclusions par défaut de toute commande rsync (traduits en --exclude xxx).
-     * @var array
-     * @see sync()
-     */
-    private static $_aDefaultRsyncExclude = array(
-        '.bzr/', '.cvsignore', '.git/', '.gitignore', '.svn/', 'cvslog.*', 'CVS', 'CVS.adm'
-    );
-
-    /**
-     * Log adapter, utilisé pour loguer les commandes exécutées.
+     * PSR-3 logger
+     *
      * @var \Psr\Log\LoggerInterface
      * @see exec()
      */
     private $_oLogger;
 
+    /**
+     * Default configuration.
+     *
+     * @var array
+     */
+    private static $aDefaultConfig = array(
+        // (string) Path of Bash:
+        'bash_path' => '/bin/bash',
+
+        // (string) List of '-o option' options used for all SSH and SCP commands:
+        'ssh_options' => '-o ServerAliveInterval=10 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes',
+
+        // (int) Maximal number of command shells launched simultaneously (parallel processes):
+        'parallelization_max_nb_processes' => 10,
+
+        // (int) Maximal number of parallel RSYNC (overriding 'parallelization_max_nb_processes'):
+        'rsync_max_nb_processes' => 5,
+
+        // (array) List of exclusion patterns for RSYNC command (converted into list of '--exclude <pattern>'):
+        'default_rsync_exclude' => array(
+            '.bzr/', '.cvsignore', '.git/', '.gitignore', '.svn/', 'cvslog.*', 'CVS', 'CVS.adm'
+        )
+    );
+
+    /**
+     * Current configuration.
+     *
+     * @var array
+     * @see $aDefaultConfig
+     */
     private $_aConfig;
 
     /**
-     * Options de type "[-o ssh_option]" à ajouter à chaque commande SSH ou SCP.
+     * Bash pattern command to call 'parallelize.sh' script.
+     *
      * @var string
      */
-    private $_sSSHOptions;
+    private $sParallelizeCmdPattern;
 
     /**
-     * Constructeur.
+     * Constructor.
      *
-     * @param \Psr\Log\LoggerInterface $oLogger Instance utilisée pour loguer les commandes exécutées
+     * @param \Psr\Log\LoggerInterface $oLogger Used to log exectued shell commands
+     * @param array $aConfig see $aDefaultConfig
      */
-    public function __construct (LoggerInterface $oLogger, array $aConfig)
+    public function __construct (LoggerInterface $oLogger, array $aConfig = array())
     {
         $this->_oLogger = $oLogger;
-        $this->_aConfig = $aConfig;
+        $this->_aConfig = Helpers::arrayMergeRecursiveDistinct(self::$aDefaultConfig, $aConfig);
         $this->_aFileStatus = array();
-
-        $this->_sSSHOptions = ' -o StrictHostKeyChecking=no'
-                            . ' -o ConnectTimeout=' . $this->_aConfig['ssh_connection_timeout']
-                            . ' -o BatchMode=yes';
+        $this->sParallelizeCmdPattern = $this->_aConfig['bash_path']
+                                      . ' ' . realpath(__DIR__ . '/../../inc/parallelize.sh') . ' "%s" "%s"';
     }
 
     /**
-     * Exécute dans des processus parallèles les déclinaisons du pattern spécifié en fonction des valeurs.
-     * Plusieurs lots de processus parallèles peuvent être générés si le nombre de valeurs
-     * dépasse la limite $iMax.
+     * Launch parallel processes running pattern filled with each of specified values.
+     * If number of values is greater than $iMax, then several batches are launched.
      *
-     * Exemple : $this->parallelize(array('aai@aai-01', 'prod@aai-01'), "ssh [] /bin/bash <<EOF\nls -l\nEOF\n", 2);
-     * Exemple : $this->parallelize(array('a', 'b'), 'cat /.../resources/[].txt', 2);
+     * Example: $this->parallelize(array('user1@server', 'user2@server'), "ssh [] /bin/bash <<EOF\nls -l\nEOF\n", 2);
+     * Example: $this->parallelize(array('a', 'b'), 'cat /path/to/resources/[].txt', 2);
      *
      * @param array $aValues liste de valeurs qui viendront remplacer le(s) '[]' du pattern
      * @param string $sPattern pattern possédant une ou plusieurs occurences de paires de crochets vides '[]'
@@ -86,9 +103,9 @@ class ShellAdapter implements ShellInterface
      *         'error' => (string) sortie d'erreur standard,
      *     ), ...
      * )
-     * @throws RuntimeException si le moindre code de retour Shell non nul apparaît.
-     * @throws RuntimeException si une valeur hors de $aValues apparaît dans les entrées 'value'.
-     * @throws RuntimeException s'il manque des valeurs de $aValues dans le résultat final.
+     * @throws \RuntimeException si le moindre code de retour Shell non nul apparaît.
+     * @throws \RuntimeException si une valeur hors de $aValues apparaît dans les entrées 'value'.
+     * @throws \RuntimeException s'il manque des valeurs de $aValues dans le résultat final.
      */
     public function parallelize (array $aValues, $sPattern, $iMax)
     {
@@ -102,9 +119,11 @@ class ShellAdapter implements ShellInterface
         }
 
         // Exécution de la demande de parallélisation :
-        $sCmdPattern = $this->_aConfig['bash_path'] . ' ' . $this->_aConfig['lib_dir']
-                     . '/parallelize.inc.sh "%s" "%s"';
-        $sCmd = sprintf($sCmdPattern, addcslashes(implode(' ', $aValues), '"'), addcslashes($sPattern, '"'));
+        $sCmd = sprintf(
+            $this->sParallelizeCmdPattern,
+            addcslashes(implode(' ', $aValues), '"'),
+            addcslashes($sPattern, '"')
+        );
         $aExecResult = $this->exec($sCmd);
 
         // Découpage du flux de retour d'exécution :
@@ -156,11 +175,11 @@ class ShellAdapter implements ShellInterface
      *
      * @param string $sCmd
      * @return array tableau indexé du flux de sortie shell découpé par ligne
-     * @throws RuntimeException en cas d'erreur shell
+     * @throws \RuntimeException en cas d'erreur shell
      */
     public function exec ($sCmd)
     {
-        $this->_oLogger->log(LogLevel::DEBUG, '[DEBUG] shell# ' . trim($sCmd, " \t"));
+        $this->_oLogger->debug('[DEBUG] shell# ' . trim($sCmd, " \t"));
         $sFullCmd = '( ' . $sCmd . ' ) 2>&1';
         exec($sFullCmd, $aResult, $iReturnCode);
         if ($iReturnCode !== 0) {
@@ -180,7 +199,7 @@ class ShellAdapter implements ShellInterface
      * @param string $sParam paramètre du pattern $sPatternCmd, permettant en plus de décider si l'on
      * doit encapsuler la commande dans un SSH (si serveur distant) ou non.
      * @return array tableau indexé du flux de sortie shell découpé par ligne
-     * @throws RuntimeException en cas d'erreur shell
+     * @throws \RuntimeException en cas d'erreur shell
      * @see isRemotePath()
      */
     public function execSSH ($sPatternCmd, $sParam)
@@ -207,7 +226,7 @@ class ShellAdapter implements ShellInterface
         $sCmd = sprintf($sPatternCmd, $this->escapePath($sRealPath));
         //$sCmd = vsprintf($sPatternCmd, array_map(array(self, 'escapePath'), $mParams));
         if ($bIsRemote) {
-            $sCmd = 'ssh' . $this->_sSSHOptions . " -T $sServer "
+            $sCmd = 'ssh ' . $this->_aConfig['ssh_options'] . " -T $sServer "
                   . $this->_aConfig['bash_path'] . " <<EOF\n$sCmd\nEOF\n";
         }
         return $sCmd;
@@ -226,7 +245,7 @@ class ShellAdapter implements ShellInterface
      *
      * @param string $sPath chemin à tester, de la forme [user@server:]/path
      * @return int l'une des constantes de Shell_PathStatus
-     * @throws RuntimeException en cas d'erreur shell
+     * @throws \RuntimeException en cas d'erreur shell
      * @see Shell_PathStatus
      * @see _aFileStatus
      */
@@ -263,7 +282,7 @@ class ShellAdapter implements ShellInterface
      * @param string $sPath chemin à tester, sans mention de serveur
      * @param array $aServers liste de serveurs sur lesquels faire la demande de statut
      * @return array tableau associatif listant par serveur (clé) le status (valeur, constante de Shell_PathStatus)
-     * @throws RuntimeException en cas d'erreur shell
+     * @throws \RuntimeException en cas d'erreur shell
      * @see getPathStatus()
      */
     public function getParallelSSHPathStatus ($sPath, array $aServers)
@@ -338,7 +357,7 @@ class ShellAdapter implements ShellInterface
      * @param bool $bIsDestFile précise si le chemin de destination est un simple fichier ou non,
      * information nécessaire si l'on doit créer une partie de ce chemin si inexistant
      * @return array tableau indexé du flux de sortie shell découpé par ligne
-     * @throws RuntimeException en cas d'erreur shell
+     * @throws \RuntimeException en cas d'erreur shell
      */
     public function copy ($sSrcPath, $sDestPath, $bIsDestFile=false)
     {
@@ -351,7 +370,7 @@ class ShellAdapter implements ShellInterface
         list(, $sDestServer, $sDestRealPath) = $this->isRemotePath($sDestPath);
 
         if ($sSrcServer != $sDestServer) {
-            $sCmd = 'scp' . $this->_sSSHOptions . ' -rpq '
+            $sCmd = 'scp ' . $this->_aConfig['ssh_options'] . ' -rpq '
                   . $this->escapePath($sSrcPath) . ' ' . $this->escapePath($sDestPath);
             return $this->exec($sCmd);
         } else {
@@ -366,8 +385,8 @@ class ShellAdapter implements ShellInterface
      * @param string $sLinkPath nom du lien, au format [[user@]hostname_or_ip:]/path
      * @param string $sTargetPath cible sur laquelle faire pointer le lien, au format [[user@]hostname_or_ip:]/path
      * @return array tableau indexé du flux de sortie shell découpé par ligne
-     * @throws DomainException si les chemins référencent des serveurs différents
-     * @throws RuntimeException en cas d'erreur shell
+     * @throws \DomainException si les chemins référencent des serveurs différents
+     * @throws \RuntimeException en cas d'erreur shell
      */
     public function createLink ($sLinkPath, $sTargetPath)
     {
@@ -403,8 +422,8 @@ class ShellAdapter implements ShellInterface
      *
      * @param string $sPath chemin à supprimer, au format [[user@]hostname_or_ip:]/path
      * @return array tableau indexé du flux de sortie shell découpé par ligne
-     * @throws DomainException si chemin invalide (garde-fou)
-     * @throws RuntimeException en cas d'erreur shell
+     * @throws \DomainException si chemin invalide (garde-fou)
+     * @throws \RuntimeException en cas d'erreur shell
      * @see getPathStatus()
      */
     public function remove ($sPath)
@@ -433,7 +452,7 @@ class ShellAdapter implements ShellInterface
      * @param string $sSrcPath au format [[user@]hostname_or_ip:]/path
      * @param string $sBackupPath au format [[user@]hostname_or_ip:]/path
      * @return array tableau indexé du flux de sortie shell découpé par ligne
-     * @throws RuntimeException en cas d'erreur shell
+     * @throws \RuntimeException en cas d'erreur shell
      */
     public function backup ($sSrcPath, $sBackupPath)
     {
@@ -441,7 +460,7 @@ class ShellAdapter implements ShellInterface
         list(, $sBackupServer, $sBackupRealPath) = $this->isRemotePath($sBackupPath);
 
         if ($sSrcServer != $sBackupServer) {
-            $sTmpDir = ($bIsSrcRemote ? $sSrcServer. ':' : '') . $this->_aConfig['tmp_dir'] . '/'
+            $sTmpDir = ($bIsSrcRemote ? $sSrcServer. ':' : '') . realpath(sys_get_temp_dir()) . '/'
                      . uniqid('deployment_', true);
             $sTmpPath = $sTmpDir . '/' . pathinfo($sBackupPath, PATHINFO_BASENAME);
             return array_merge(
@@ -485,8 +504,7 @@ class ShellAdapter implements ShellInterface
      * @param array $aValues liste de valeurs (string) optionnelles pour générer autant de demandes de
      * synchronisation en parallèle. Dans ce cas ces valeurs viendront remplacer l'une après l'autre
      * les occurences de crochets vide '[]' présents dans $sSrcPath ou $sDestPath.
-     * @return array tableau indexé du flux de sortie shell découpé par ligne
-     * @throws RuntimeException en cas d'erreur shell
+     * @throws \RuntimeException en cas d'erreur shell
      */
     public function mkdir ($sPath, $sMode='', array $aValues=array())
     {
@@ -502,21 +520,15 @@ class ShellAdapter implements ShellInterface
             $aParallelResult = $this->parallelize($aValues, $sCmd, $this->_aConfig['parallelization_max_nb_processes']);
 
             // Traiter les résultats et MAJ le cache :
-            $aResult = array();
             foreach ($aParallelResult as $aServerResult) {
                 $sValue = $aServerResult['value'];
-                $sOutput = $aServerResult['output'];
                 $sFinalPath = str_replace('[]', $sValue, $sPath);
                 $this->_aFileStatus[$sFinalPath] = PathStatus::STATUS_DIR;
-                if (strlen($sOutput) > 0) {
-                    $aResult[] = "$sValue: $sOutput";
-                }
             }
         } else {
-            $aResult = $this->exec($sCmd);
+            $this->exec($sCmd);
             $this->_aFileStatus[$sPath] = PathStatus::STATUS_DIR;
         }
-        return $aResult;
     }
 
     /**
@@ -532,8 +544,8 @@ class ShellAdapter implements ShellInterface
      * @param array $aExcludedPaths chemins à transmettre aux paramètres --exclude de la commande shell rsync
      * @return array tableau indexé du flux de sortie shell des commandes rsync exécutées,
      * découpé par ligne et analysé par _resumeSyncResult()
-     * @throws RuntimeException en cas d'erreur shell
-     * @throws RuntimeException car non implémenté quand plusieurs $mDestPath et $sSrcPath sont distants
+     * @throws \RuntimeException en cas d'erreur shell
+     * @throws \RuntimeException car non implémenté quand plusieurs $mDestPath et $sSrcPath sont distants
      */
     public function sync ($sSrcPath, $sDestPath, array $aValues=array(),
             array $aIncludedPaths=array(), array $aExcludedPaths=array(),
@@ -548,7 +560,7 @@ class ShellAdapter implements ShellInterface
         $sIncludedPaths = (count($aIncludedPaths) === 0
                               ? ''
                               : '--include="' . implode('" --include="', array_unique($aIncludedPaths)) . '" ');
-        $aExcludedPaths = array_unique(array_merge(self::$_aDefaultRsyncExclude, $aExcludedPaths));
+        $aExcludedPaths = array_unique(array_merge($this->_aConfig['default_rsync_exclude'], $aExcludedPaths));
         $sExcludedPaths = (count($aExcludedPaths) === 0
                               ? ''
                               : '--exclude="' . implode('" --exclude="', $aExcludedPaths) . '" ');
@@ -582,8 +594,8 @@ class ShellAdapter implements ShellInterface
                          . ' (~' . $aServerResult['elapsed_time'] . 's)' . "\n";
             }
             $aRawOutput = explode("\n", $aServerResult['output']);
-            $aOutput = $this->_resumeSyncResult($aRawOutput);
-            $aOutput = array($sHeader . $aOutput[0]);
+            $sOutput = $this->_resumeSyncResult($aRawOutput);
+            $aOutput = array($sHeader . $sOutput);
             $aAllResults = array_merge($aAllResults, $aOutput);
         }
 
@@ -619,7 +631,7 @@ class ShellAdapter implements ShellInterface
     private function _resumeSyncResult (array $aRawResult)
     {
         if (count($aRawResult) === 0 || (count($aRawResult) === 1 && $aRawResult[0] == '')) {
-            $aResult = array('Empty source directory.');
+            $sResult = 'Empty source directory.';
         } else {
             $aKeys = array(
                 'number of files',
@@ -629,38 +641,25 @@ class ShellAdapter implements ShellInterface
             );
             $aEmptyStats = array_fill_keys($aKeys, '?');
 
-            $aAllStats = array();
-            $aStats = NULL;
+            $aStats = $aEmptyStats;
             foreach ($aRawResult as $sLine) {
                 if (preg_match('/^([^:]+):\s(\d+)\b/i', $sLine, $aMatches) === 1) {
                     $sKey = strtolower($aMatches[1]);
-                    if ($sKey === 'number of files') {
-                        if ($aStats !== NULL) {
-                            $aAllStats[] = $aStats;
-                        }
-                        $aStats = $aEmptyStats;
-                    }
                     if (isset($aStats[$sKey])) {
                         $aStats[$sKey] = (int)$aMatches[2];
                     }
                 }
             }
-            if ($aStats !== NULL) {
-                $aAllStats[] = $aStats;
-            }
 
-            $aResult = array();
-            foreach ($aAllStats as $aStats) {
-                list($sTransferred, $sTransfUnit) =
-                    Helpers::intToMultiple($aStats['total transferred file size'], true);
-                list($sTotal, $sTotalUnit) = Helpers::intToMultiple($aStats['total file size'], true);
+            list($sTransferred, $sTransfUnit) =
+                Helpers::intToMultiple($aStats['total transferred file size'], true);
+            list($sTotal, $sTotalUnit) = Helpers::intToMultiple($aStats['total file size'], true);
 
-                $aResult[] = 'Number of transferred files ( / total): ' . $aStats['number of files transferred']
-                           . ' / ' . $aStats['number of files'] . "\n"
-                           . 'Total transferred file size ( / total): '
-                           . $sTransferred . ' ' . $sTransfUnit . 'o / ' . $sTotal . ' ' . $sTotalUnit . 'o';
-            }
+            $sResult = 'Number of transferred files ( / total): ' . $aStats['number of files transferred']
+                     . ' / ' . $aStats['number of files'] . "\n"
+                     . 'Total transferred file size ( / total): '
+                     . $sTransferred . ' ' . $sTransfUnit . 'o / ' . round($sTotal) . ' ' . $sTotalUnit . 'o';
         }
-        return $aResult;
+        return $sResult;
     }
 }
