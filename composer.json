@@ -1,7 +1,5 @@
 {
     "name":         "geoffroy-aubry/shell",
-    "description":  "",
-    "keywords":     [""],
     "type":         "library",
     "license":      "LGPL-3.0+",
     "authors":      [
