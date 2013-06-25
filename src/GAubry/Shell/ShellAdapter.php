@@ -6,13 +6,14 @@ use Psr\Log\LoggerInterface;
 use GAubry\Helpers\Helpers;
 
 /**
- * Classe outil facilitant l'exécution des commandes shell.
+ *
  */
 class ShellAdapter
 {
 
     /**
-     * Table de hashage de mise en cache des demande de statuts de chemins système.
+     * Cache of status of file system paths.
+     *
      * @var array
      * @see getPathStatus()
      * @see Shell_PathStatus
@@ -20,7 +21,8 @@ class ShellAdapter
     private $_aFileStatus;
 
     /**
-     * Log adapter, utilisé pour loguer les commandes exécutées.
+     * PSR-3 logger
+     *
      * @var \Psr\Log\LoggerInterface
      * @see exec()
      */
@@ -32,34 +34,44 @@ class ShellAdapter
      * @var array
      */
     private static $aDefaultConfig = array(
-        // (int) Nombre maximal de processus lancés en parallèle par parallelize.sh :
-        'parallelization_max_nb_processes' => 10,
-
-        // (string) Chemin vers le shell bash :
+        // (string) Path of Bash:
         'bash_path' => '/bin/bash',
 
-        // Options de type "[-o ssh_option]" à ajouter à chaque commande SSH ou SCP.
+        // (string) List of '-o option' options used for all SSH and SCP commands:
         'ssh_options' => '-o ServerAliveInterval=10 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes',
 
-        // (int) Nombre maximal d'exécutions shell rsync en parallèle.
-        // Prioritaire sur 'parallelization_max_nb_processes'.
-        'rsync_max_nb_processes' => 5
+        // (int) Maximal number of command shells launched simultaneously (parallel processes):
+        'parallelization_max_nb_processes' => 10,
+
+        // (int) Maximal number of parallel RSYNC (overriding 'parallelization_max_nb_processes'):
+        'rsync_max_nb_processes' => 5,
+
+        // (array) List of exclusion patterns for RSYNC command (converted into list of '--exclude <pattern>'):
+        'default_rsync_exclude' => array(
+            '.bzr/', '.cvsignore', '.git/', '.gitignore', '.svn/', 'cvslog.*', 'CVS', 'CVS.adm'
+        )
     );
 
     /**
      * Current configuration.
+     *
      * @var array
-     * @see Shell::$aDefaultConfig
+     * @see $aDefaultConfig
      */
     private $_aConfig;
 
+    /**
+     * Bash pattern command to call 'parallelize.sh' script.
+     *
+     * @var string
+     */
     private $sParallelizeCmdPattern;
 
     /**
-     * Constructeur.
+     * Constructor.
      *
-     * @param \Psr\Log\LoggerInterface $oLogger Instance utilisée pour loguer les commandes exécutées
-     * @param array $aConfig see self::$aDefaultConfig
+     * @param \Psr\Log\LoggerInterface $oLogger Used to log exectued shell commands
+     * @param array $aConfig see $aDefaultConfig
      */
     public function __construct (LoggerInterface $oLogger, array $aConfig = array())
     {
@@ -71,12 +83,11 @@ class ShellAdapter
     }
 
     /**
-     * Exécute dans des processus parallèles les déclinaisons du pattern spécifié en fonction des valeurs.
-     * Plusieurs lots de processus parallèles peuvent être générés si le nombre de valeurs
-     * dépasse la limite $iMax.
+     * Launch parallel processes running pattern filled with each of specified values.
+     * If number of values is greater than $iMax, then several batches are launched.
      *
-     * Exemple : $this->parallelize(array('user1@server', 'user2@server'), "ssh [] /bin/bash <<EOF\nls -l\nEOF\n", 2);
-     * Exemple : $this->parallelize(array('a', 'b'), 'cat /.../resources/[].txt', 2);
+     * Example: $this->parallelize(array('user1@server', 'user2@server'), "ssh [] /bin/bash <<EOF\nls -l\nEOF\n", 2);
+     * Example: $this->parallelize(array('a', 'b'), 'cat /path/to/resources/[].txt', 2);
      *
      * @param array $aValues liste de valeurs qui viendront remplacer le(s) '[]' du pattern
      * @param string $sPattern pattern possédant une ou plusieurs occurences de paires de crochets vides '[]'

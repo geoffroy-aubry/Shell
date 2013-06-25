@@ -18,21 +18,22 @@ $aDirs = array(
 
 $aConfig = $aDirs + array(
     'GAubry\Shell' => array(
-        // (int) Nombre maximal de processus lancés en parallèle par parallelize.sh :
-        'parallelization_max_nb_processes' => 10,
-
-        // (string) Chemin vers le shell bash :
+        // (string) Path of Bash:
         'bash_path' => '/bin/bash',
 
-        // Options de type "[-o ssh_option]" à ajouter à chaque commande SSH ou SCP.
+        // (string) List of '-o option' options used for all SSH and SCP commands:
         'ssh_options' => '-o ServerAliveInterval=10 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes',
 
-        // (int) Nombre maximal d'exécutions shell rsync en parallèle.
-        // Prioritaire sur 'parallelization_max_nb_processes'.
+        // (int) Maximal number of command shells launched simultaneously (parallel processes):
+        'parallelization_max_nb_processes' => 10,
+
+        // (int) Maximal number of parallel RSYNC (overriding 'parallelization_max_nb_processes'):
         'rsync_max_nb_processes' => 5,
 
-        // (string) Liste d'exclusions par défaut de toute commande rsync (traduits en --exclude xxx).
-        'default_rsync_exclude' => array('.bzr/', '.cvsignore', '.git/', '.gitignore', '.svn/', 'cvslog.*', 'CVS', 'CVS.adm')
+        // (array) List of exclusion patterns for RSYNC command (converted into list of '--exclude <pattern>'):
+        'default_rsync_exclude' => array(
+            '.bzr/', '.cvsignore', '.git/', '.gitignore', '.svn/', 'cvslog.*', 'CVS', 'CVS.adm'
+        )
     )
 );
 

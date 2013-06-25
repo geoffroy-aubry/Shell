@@ -11,41 +11,19 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
 {
 
     /**
-     * Instance de log.
      * @var Logger_Interface
      */
     private $oLogger;
 
     /**
      * Instance Shell.
-     * @var Shell_Interface
+     * @var ShellAdapter
      */
     private $oShell;
 
     private $_aConfig;
     private $_aResourcesDir;
     private $sParallelizeCmdPattern;
-
-    /**
-     * Tableau indexé contenant les commandes Shell de tous les appels effectués à Shell_Adapter::exec().
-     * @var array
-     * @see shellExecCallback()
-     */
-    private $aShellExecCmds;
-
-    /**
-     * Callback déclenchée sur appel de Shell_Adapter::exec().
-     * Log tous les appels dans le tableau indexé $this->aShellExecCmds.
-     *
-     * @param string $sCmd commande Shell qui aurait dûe être exécutée.
-     * @return array tableau vide
-     * @see $aShellExecCmds
-     */
-    public function shellExecCallback ($sCmd)
-    {
-        $this->aShellExecCmds[] = $sCmd;
-        return array();
-    }
 
     /**
      * Sets up the fixture, for example, open a network connection.

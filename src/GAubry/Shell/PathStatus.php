@@ -3,48 +3,48 @@
 namespace GAubry\Shell;
 
 /**
- * Collection des statuts possibles pour un chemin du système de fichiers.
+ * All possible status for a file system path.
  */
 final class PathStatus
 {
     /**
-     * Le chemin n'existe pas.
+     * Path doesn't exist.
      * @var int
      */
     const STATUS_NOT_EXISTS = 0;
 
     /**
-     * Le chemin est un fichier.
+     * Path is a file.
      * @var int
      */
     const STATUS_FILE = 1;
 
     /**
-     * Le chemin est un répertoire.
+     * Path is a directory.
      * @var int
      */
     const STATUS_DIR = 2;
 
     /**
-     * Le chemin est un lien symbolique cassé.
+     * Path is a broken symbolic link.
      * @var int
      */
     const STATUS_BROKEN_SYMLINK = 10;
 
     /**
-     * Le chemin est un lien symbolique pointant sur un fichier.
+     * Path is a symbolic link to a true file.
      * @var int
      */
     const STATUS_SYMLINKED_FILE = 11;
 
     /**
-     * Le chemin est un lien symbolique pointant sur un répertoire.
+     * Path is a symbolic link to a directory.
      * @var int
      */
     const STATUS_SYMLINKED_DIR = 12;
 
     /**
-     * Classe de constantes, non instanciable.
+     * Constructor.
      * @codeCoverageIgnore
      */
     private function __construct()
