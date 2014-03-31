@@ -1084,7 +1084,7 @@ Total transferred file size ( / total): 178 o / 61 Mio
         $sCmd = sprintf(
             $this->sParallelizeCmdPattern,
             '-',
-            'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --stats -e ssh \"/srcpath/to/my file\" \"/destpath/to/my dir\"'
+            'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --stats -e \"ssh -o ServerAliveInterval=10 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes\" \"/srcpath/to/my file\" \"/destpath/to/my dir\"'
         );
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->at(0))->method('exec')
@@ -1132,7 +1132,7 @@ Total transferred file size ( / total): 178 o / 63 Kio
         $sCmd = sprintf(
             $this->sParallelizeCmdPattern,
             '-',
-            'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --stats -e ssh \"/srcpath/to/my file\" \"/destpath/to/my dir\"'
+            'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --stats -e \"ssh -o ServerAliveInterval=10 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes\" \"/srcpath/to/my file\" \"/destpath/to/my dir\"'
         );
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->at(0))->method('exec')
@@ -1180,7 +1180,7 @@ Total transferred file size ( / total): 178 o / 640 o
         $sCmd = sprintf(
             $this->sParallelizeCmdPattern,
             '-',
-            'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --stats -e ssh \"/srcpath/to/my file\" \"/destpath/to/my dir\"'
+            'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --stats -e \"ssh -o ServerAliveInterval=10 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes\" \"/srcpath/to/my file\" \"/destpath/to/my dir\"'
         );
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->at(0))->method('exec')
@@ -1210,7 +1210,7 @@ Total transferred file size ( / total): 178 o / 640 o
         $sCmd = sprintf(
             $this->sParallelizeCmdPattern,
             '-',
-            'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --stats -e ssh \"/srcpath/to/my file\" \"/destpath/to/my dir\"'
+            'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --stats -e \"ssh -o ServerAliveInterval=10 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes\" \"/srcpath/to/my file\" \"/destpath/to/my dir\"'
         );
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->at(0))->method('exec')
@@ -1259,7 +1259,7 @@ Total transferred file size ( / total): 178 o / 61 Mio',
         $sCmd = sprintf(
             $this->sParallelizeCmdPattern,
             '-',
-            'if ls -1 \"/srcpath/to/my files\" | grep -q .; then rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --stats -e ssh \"/srcpath/to/my files/\"* \"/destpath/to/my dir\"; fi'
+            'if ls -1 \"/srcpath/to/my files\" | grep -q .; then rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --stats -e \"ssh -o ServerAliveInterval=10 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes\" \"/srcpath/to/my files/\"* \"/destpath/to/my dir\"; fi'
         );
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->at(0))->method('exec')
@@ -1308,7 +1308,7 @@ Total transferred file size ( / total): 178 o / 61 Mio',
         $sCmd = sprintf(
             $this->sParallelizeCmdPattern,
             '-',
-            'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --stats -e ssh \"/srcpath/to/my files/\" \"/destpath/to/my dir\"'
+            'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --stats -e \"ssh -o ServerAliveInterval=10 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes\" \"/srcpath/to/my files/\" \"/destpath/to/my dir\"'
         );
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->at(0))->method('exec')
@@ -1356,7 +1356,7 @@ Total transferred file size ( / total): 178 o / 61 Mio
         $sCmd = sprintf(
             $this->sParallelizeCmdPattern,
             '-',
-            'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --exclude=\"toto\" --exclude=\"titi\" --stats -e ssh \"/srcpath/to/my file\" \"/destpath/to/my dir\"'
+            'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --exclude=\"toto\" --exclude=\"titi\" --stats -e \"ssh -o ServerAliveInterval=10 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes\" \"/srcpath/to/my file\" \"/destpath/to/my dir\"'
         );
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->at(0))->method('exec')
@@ -1404,7 +1404,7 @@ Total transferred file size ( / total): 178 o / 61 Mio
         $sCmd = sprintf(
             $this->sParallelizeCmdPattern,
             '-',
-            'rsync -axz --delete --include=\"*.js\" --include=\"*.css\" --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --exclude=\"*\" --stats -e ssh \"/srcpath/to/my file\" \"/destpath/to/my dir\"'
+            'rsync -axz --delete --include=\"*.js\" --include=\"*.css\" --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --exclude=\"*\" --stats -e \"ssh -o ServerAliveInterval=10 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes\" \"/srcpath/to/my file\" \"/destpath/to/my dir\"'
         );
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->at(0))->method('exec')
@@ -1486,7 +1486,7 @@ Total transferred file size ( / total): 178 o / 626 Kio',
         $sCmd2 = sprintf(
             $this->sParallelizeCmdPattern,
             'server1 login@server2',
-            'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --stats -e ssh \"/srcpath/to/my file\" \"[]:/destpath/to/my dir\"'
+            'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --stats -e \"ssh -o ServerAliveInterval=10 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes\" \"/srcpath/to/my file\" \"[]:/destpath/to/my dir\"'
         );
 
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
@@ -1534,7 +1534,7 @@ Total transferred file size ( / total): 178 o / 626 Kio',
             '-',
             'ssh -o ServerAliveInterval=10 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes -T user@server /bin/bash <<EOF'
                 . "\n"
-                . 'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --exclude=\"smarty/*/wrt*\" --exclude=\"smarty/**/wrt*\" --stats -e ssh \"/srcpath/to/my dir\" \"/destpath/to/my dir\"'
+                . 'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --exclude=\"smarty/*/wrt*\" --exclude=\"smarty/**/wrt*\" --stats -e \"ssh -o ServerAliveInterval=10 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes\" \"/srcpath/to/my dir\" \"/destpath/to/my dir\"'
                 . "\nEOF\n"
         );
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
@@ -1578,7 +1578,7 @@ Total transferred file size ( / total): 178 o / 626 Kio',
             '-',
             'ssh -o ServerAliveInterval=10 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes -T user@server1 /bin/bash <<EOF'
                 . "\n"
-                . 'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --stats -e ssh \"/srcpath/to/my dir\" \"server2:/destpath/to/my dir\"'
+                . 'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --stats -e \"ssh -o ServerAliveInterval=10 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes\" \"/srcpath/to/my dir\" \"server2:/destpath/to/my dir\"'
                 . "\nEOF\n"
         );
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
@@ -1620,7 +1620,7 @@ Total transferred file size ( / total): 178 o / 626 Kio',
         $sCmd = sprintf(
             $this->sParallelizeCmdPattern,
             '-',
-            'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --stats -e ssh \"user@server1:/srcpath/to/my dir\" \"/destpath/to/my dir\"'
+            'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --stats -e \"ssh -o ServerAliveInterval=10 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes\" \"user@server1:/srcpath/to/my dir\" \"/destpath/to/my dir\"'
         );
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->at(0))->method('exec')
@@ -1698,7 +1698,7 @@ Total transferred file size ( / total): 178 o / 6 Kio',
             $this->sParallelizeCmdPattern,
             'server1 user1@server2',
             'ssh -o ServerAliveInterval=10 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes -T user@server1 /bin/bash <<EOF' . "\n"
-                . 'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --stats -e ssh \"/srcpath/to/my dir\" \"[]:/destpath/to/my dir\"'
+                . 'rsync -axz --delete --exclude=\".bzr/\" --exclude=\".cvsignore\" --exclude=\".git/\" --exclude=\".gitignore\" --exclude=\".svn/\" --exclude=\"cvslog.*\" --exclude=\"CVS\" --exclude=\"CVS.adm\" --stats -e \"ssh -o ServerAliveInterval=10 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes\" \"/srcpath/to/my dir\" \"[]:/destpath/to/my dir\"'
                 . "\nEOF\n"
         );
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
