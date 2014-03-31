@@ -549,8 +549,13 @@ class ShellAdapter
      */
     public function sync ($sSrcPath, $sDestPath, array $aValues=array(),
             array $aIncludedPaths=array(), array $aExcludedPaths=array(),
-            $sRsyncPattern='rsync -axz --delete %1$s%2$s--stats -e ssh %3$s %4$s')
+            $sRsyncPattern='')
     {
+        if (empty($sRsyncPattern)) {
+            $sRsyncPattern = 'rsync -axz --delete %1$s%2$s--stats -e "ssh '
+                           . $this->_aConfig['ssh_options'] . '" %3$s %4$s';
+        }
+
         // Cas non gérés :
         list($bIsSrcRemote, $sSrcServer, $sSrcRealPath) = $this->isRemotePath($sSrcPath);
         list($bIsDestRemote, $sDestServer, $sDestRealPath) = $this->isRemotePath($sDestPath);
