@@ -7,11 +7,36 @@ uid="$(date +'%Y%m%d%H%M%S')_$(printf '%05d' $RANDOM)"
 values="$1"; shift
 pattern="$@"
 
+# Help:
 if [ -z "$values" ] || [ -z "$pattern" ]; then
     echo 'Usage: /bin/bash parallelize.sh "host1 user@host2 ..." "cmd where [] will be replace by hosts"'
     echo 'Missing parameters!' >&2
     exit 1
 fi
+
+# Witch OS:
+uname="$(uname)"
+if [ "$uname" = 'FreeBSD' ] || [ "$uname" = 'Darwin' ]; then
+    DETECTED_OS='FreeBSD'
+else
+    DETECTED_OS='Linux'
+fi
+
+##
+# Display the last update time of specified path, in seconds since 1970-01-01 00:00:00 UTC.
+# Compatible Linux and Mac OS X.
+#
+# @param string $1 path
+# @see $DETECTED_OS
+#
+function getLastUpdateTimestamp () {
+    local path="$1"
+    if [ "$DETECTED_OS" = 'FreeBSD' ]; then
+        stat -f %m "$path"
+    else
+        date -r "$path" +%s
+    fi
+}
 
 TMP_DIR='/tmp'
 PREFIX_PATH_PATTERN="$TMP_DIR/parallel.logs.$uid."
@@ -41,8 +66,8 @@ i=0
 for value in $values; do
     outPath="$(printf "$OUT_PATH_PATTERN" "$value")"
     errPath="$(printf "$ERR_PATH_PATTERN" "$value")"
-    outEndDate="$(date --reference=$outPath +%s)"
-    errEndDate="$(date --reference=$errPath +%s)"
+    outEndDate="$(getLastUpdateTimestamp $outPath)"
+    errEndDate="$(getLastUpdateTimestamp $errPath)"
     [ "$outEndDate" -gt "$errEndDate" ] && endDate="$outEndDate" || endDate="$errEndDate"
 
     let "elapsedTime=endDate-startDate" || :
