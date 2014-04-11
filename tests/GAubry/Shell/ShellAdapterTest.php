@@ -4,6 +4,7 @@ namespace GAubry\Logger\Tests;
 
 use GAubry\Shell\ShellAdapter;
 use GAubry\Logger\MinimalLogger;
+use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use GAubry\Shell\PathStatus;
 
@@ -11,7 +12,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
 {
 
     /**
-     * @var Logger_Interface
+     * @var LoggerInterface
      */
     private $oLogger;
 
@@ -366,7 +367,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
             '\RuntimeException',
             'cat: ' . $this->_aResourcesDir . '/not_exists.txt: No such file or directory'
         );
-        $aResult = $this->oShell->parallelize(
+        $this->oShell->parallelize(
             array('testParallelize_a', 'not_exists'),
             'cat ' . $this->_aResourcesDir . '/[].txt',
             2
@@ -425,7 +426,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
     public function testExec_ThrowExceptionOnShellError ()
     {
         $this->setExpectedException('\RuntimeException', "abc\ndef", 101);
-        $aResult = $this->oShell->exec('echo abc; echo def; exit 101');
+        $this->oShell->exec('echo abc; echo def; exit 101');
     }
 
     /**
@@ -539,8 +540,6 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
      */
     public function testMkdir_WithLocalPath ()
     {
-        $aExpectedResult = array('blabla');
-
         $oMockShell = $this->getMock('\GAubry\Shell\ShellAdapter', array('exec'), array($this->oLogger, $this->_aConfig));
         $oMockShell->expects($this->at(0))->method('exec')
             ->with($this->equalTo('mkdir -p "/path/to/my file"'));
@@ -601,7 +600,7 @@ class ShellAdapterTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue($aExpectedResult));
         $oMockShell->expects($this->exactly(1))->method('exec');
 
-        $aResult = $oMockShell->mkdir('gaubry@dv2:/path/to/my file');
+        $oMockShell->mkdir('gaubry@dv2:/path/to/my file');
         $this->assertAttributeEquals(array('gaubry@dv2:/path/to/my file' => PathStatus::STATUS_DIR), '_aFileStatus', $oMockShell);
     }
 

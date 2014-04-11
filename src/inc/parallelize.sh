@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # @author Geoffroy AUBRY <geoffroy.aubry@free.fr>
 # Example: /bin/bash parallelize.sh "user@server" "ssh [] /bin/bash <<EOF\nls -l\nEOF\n"
 # Example: time /bin/bash parallelize.sh "1 2 3 4" "sleep []"
