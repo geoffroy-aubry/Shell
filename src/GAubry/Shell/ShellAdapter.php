@@ -662,7 +662,7 @@ class ShellAdapter
             $sResult = 'Number of transferred files ( / total): ' . $aStats['number of files transferred']
                      . ' / ' . $aStats['number of files'] . "\n"
                      . 'Total transferred file size ( / total): '
-                     . $sTransferred . ' ' . $sTransfUnit . 'o / ' . round($sTotal) . ' ' . $sTotalUnit . 'o';
+                     . round($sTransferred) . ' ' . $sTransfUnit . 'o / ' . round($sTotal) . ' ' . $sTotalUnit . 'o';
         }
         return $sResult;
     }
